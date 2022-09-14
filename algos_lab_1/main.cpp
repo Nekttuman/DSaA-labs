@@ -1,6 +1,4 @@
 #include "LinkedList.cpp"
-#include <iostream>
-
 
 
 int main(){
@@ -35,6 +33,11 @@ int main(){
     std::cout<<"ll2: "<<list3;
     list3.insert_ll(list2, 3);
     std::cout<<"list2.insert_ll(list1, 3) ll2: "<<list3;
+
+    std::cout<<"\nl1 == l2: "<< (list1 == list2);
+    LinkedList<int> list4(list3);
+    std::cout<<"\nl3 != l4: "<< (list3 != list4);
+
     return 0;
 }
 
