@@ -1,36 +1,3 @@
-f = open("input.txt")
-
-snails_x = []
-snails_y = []
-
-from cmath import inf
-import numpy as np
-snails = []
-
-
-for i in f.read().split('\n'):
-    x,y = (int(j) for j in i.split(' '))
-    snails_x.append(x)
-    snails_y.append(y)
-    snails.append([x,y])
-
-
-
-
-from matplotlib import pyplot as plt
-plt.style.use('ggplot')
-plt.scatter(snails_x, snails_y, s=10)
-plt.minorticks_on()
-plt.grid(which='minor', color='white',linestyle =':')
-plt.show()
-
-
-# sort coords by x
-
-snails = sorted(snails, key=lambda o: o[0])
-
-
-
 def get_distance(a,b ):
     return ((a[0] - b[0])**2 + (a[1] - b[1])**2)**0.5
 
@@ -87,14 +54,6 @@ def get_min_distance(points, l, r):
     return sorted([result1, result2, result3], key=lambda o: o[2])[0]
 
 
-(a,b,d) = get_min_distance(snails, 0, len(snails)-1)
-print(snails[a], snails[b], d)
-
-
-plt.scatter(snails_x, snails_y, s=10)
-plt.scatter([snails[a][0], snails[b][0]], [snails[a][1], snails[b][1]], c='g')
-plt.show()
-
 
 
 # cheking with n^2 algo
@@ -112,11 +71,51 @@ def another_way(points):
 
     return best
 
-(a,b,d) = another_way(snails)
-print(a,b, d)
 
 
-plt.scatter(snails_x, snails_y, s=10)
-plt.scatter([a[0], b[0]], [a[1], b[1]], c='g')
-plt.show()
+if __name__ == "__main__":
 
+    f = open("input.txt")
+
+    snails_x = []
+    snails_y = []
+
+    from cmath import inf
+    import numpy as np
+    snails = []
+
+
+    for i in f.read().split('\n'):
+        x,y = (int(j) for j in i.split(' '))
+        snails_x.append(x)
+        snails_y.append(y)
+        snails.append([x,y])
+
+
+    from matplotlib import pyplot as plt
+    plt.style.use('ggplot')
+    plt.scatter(snails_x, snails_y, s=10)
+    plt.minorticks_on()
+    plt.grid(which='minor', color='white',linestyle =':')
+    plt.show()
+
+
+    # sort coords by x
+    snails = sorted(snails, key=lambda o: o[0])
+
+    (a,b,d) = get_min_distance(snails, 0, len(snails)-1)
+    print(snails[a], snails[b], d)
+
+
+    plt.scatter(snails_x, snails_y, s=10)
+    plt.scatter([snails[a][0], snails[b][0]], [snails[a][1], snails[b][1]], c='g')
+    plt.show()
+
+    
+    (a,b,d) = another_way(snails)
+    print(a,b, d)
+
+
+    plt.scatter(snails_x, snails_y, s=10)
+    plt.scatter([a[0], b[0]], [a[1], b[1]], c='g')
+    plt.show()
