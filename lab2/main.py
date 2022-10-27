@@ -1,3 +1,6 @@
+from cProfile import label
+
+
 def get_distance(a,b ):
     return ((a[0] - b[0])**2 + (a[1] - b[1])**2)**0.5
 
@@ -103,19 +106,25 @@ if __name__ == "__main__":
     # sort coords by x
     snails = sorted(snails, key=lambda o: o[0])
 
+    import time
+
+    t = time.time()
     (a,b,d) = get_min_distance(snails, 0, len(snails)-1)
-    print(snails[a], snails[b], d)
+    print(time.time()-t)
+    print("alg divide and rule: ",snails[a], snails[b], d)
+    
 
 
     plt.scatter(snails_x, snails_y, s=10)
     plt.scatter([snails[a][0], snails[b][0]], [snails[a][1], snails[b][1]], c='g')
     plt.show()
 
-    
-    (a,b,d) = another_way(snails)
-    print(a,b, d)
+    # t = time.time()
+    # (a,b,d) = another_way(snails)
+    # print(time.time()-t)
+    # print("n**2 alg ",a,b, d)
 
 
-    plt.scatter(snails_x, snails_y, s=10)
-    plt.scatter([a[0], b[0]], [a[1], b[1]], c='g')
-    plt.show()
+    # plt.scatter(snails_x, snails_y, s=10)
+    # plt.scatter([a[0], b[0]], [a[1], b[1]], c='g')
+    # plt.show()
