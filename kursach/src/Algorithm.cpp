@@ -15,8 +15,6 @@ int isOverlap(const fig::figVariants &left, const fig::figVariants &right) {
     switch (left.index()) {
         case fig::CIRCLE:
             return isOverlaps(std::get<fig::Circle>(left), right);
-        case fig::ELLIPSE:
-            return isOverlaps(std::get<fig::Ellipse>(left), right);
         case fig::LINE:
             return isOverlaps(std::get<fig::Line>(left), right);
         case fig::RECT:

@@ -28,8 +28,6 @@ bool operator==(const fig::figVariants &left, const fig::figVariants &right) {
     switch (left.index()) {
         case fig::CIRCLE:
             return std::get<fig::Circle>(left) == std::get<fig::Circle>(right);
-        case fig::ELLIPSE:
-            return std::get<fig::Ellipse>(left) == std::get<fig::Ellipse>(right);
         case fig::LINE:
             return std::get<fig::Line>(left) == std::get<fig::Line>(right);
         case fig::RECT:
@@ -92,14 +90,19 @@ bool fig::isOverlaps(const fig::Circle &left, const fig::figVariants &rightVaria
             return (left.getRadius() >= right->getRadius()) &&
                    (d + right->getRadius() <= left.getRadius());
         }
-        case fig::ELLIPSE: {
-
-        }
         case fig::LINE: {
+            auto *right = std::get_if<fig::Line>(&rightVariant);
+            bool firstInCircle = left.isPointBelongs(right->getPoint1());
+            bool secondInCircle = left.isPointBelongs(right->getPoint2());
 
+            return firstInCircle && secondInCircle;
         }
         case fig::RECT: {
-
+            auto *right = std::get_if<fig::Rect>(&rightVariant);
+            fig::Point p1 = right->getPosition();
+            fig::Point p2 {p1.x, p1.y+right->getHeight()}, p3{p1.x + right->getWidth(), p1.y},
+                    p3{p1.x + right->getWidth(),p1.y+right->getHeight()};
+            return  (left.isPointBelongs(p1) && })
         }
         case fig::PATH: {
 
@@ -108,37 +111,6 @@ bool fig::isOverlaps(const fig::Circle &left, const fig::figVariants &rightVaria
 
         }
     }
-}
-
-/////////////////////////////////////////// ELLIPSE ///////////////////////////////////////////////
-
-void fig::Ellipse::parseSvg(const std::string &svgStr) {
-// Format example:
-// <ellipse cx="100" cy="50" rx="100" ry="50" />
-//
-    std::regex numberR(R"(\d+)"), cxR(R"(cx\s*=\s*"\d+")"),
-            cyR(R"(cy\s*=\s*"\d+")"), rxR(R"(rx\s*=\s*"\d+")"), ryR(R"(ry\s*=\s*"\d+")");
-
-    m_c.x = getNumberFromRegex(cxR, svgStr);
-    m_c.y = getNumberFromRegex(cyR, svgStr);
-    m_rx = getNumberFromRegex(rxR, svgStr);
-    m_ry = getNumberFromRegex(ryR, svgStr);
-}
-
-void fig::Ellipse::print() const {
-    std::cout << "Ellipse: c = " << getCenter() << ", rx = " << getXRadius() << ", rx = "
-              << getYRadius();
-}
-
-
-// friend
-
-bool fig::operator==(const fig::Ellipse &left, const fig::Ellipse &right) {
-    return (right.m_c == left.m_c) && (right.m_rx == left.m_rx) && (right.m_ry == left.m_ry);
-}
-
-bool fig::isOverlaps(const fig::Ellipse &left, const fig::figVariants &right) {
-    return false; //TODO
 }
 
 

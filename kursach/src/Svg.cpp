@@ -46,17 +46,13 @@ Svg::Svg(const std::string &path) {
 bool Svg::parseElem(const std::string &elemStr) {
     // TODO parse Circle Ellipse and rect with fill="None" as Path
     std::smatch match;
-    const static std::regex circleR(R"(^<circle.+?\/>)"), ellipseR(R"(^<ellipse.+?\/>)"),
-            lineR(R"(^<line.+?\/>)"), rectR(R"(^<rect.+?\/>)"),
-            polylineR(R"(^<polyline.+?\/>)"), polygonR(R"(^<polygon.+?\/>)"),
-            fillNoneR(R"(fill\s*=\s*"none")");
+    const static std::regex circleR(R"(^<circle.+?\/>)"), lineR(R"(^<line.+?\/>)"),
+            rectR(R"(^<rect.+?\/>)"), polylineR(R"(^<polyline.+?\/>)"),
+            polygonR(R"(^<polygon.+?\/>)"), fillNoneR(R"(fill\s*=\s*"none")");
 
     if (std::regex_match(elemStr, match, circleR)) {
         m_figures.emplace_back(fig::Circle());
         std::get<fig::Circle>(m_figures.back()).parseSvg(elemStr);
-    } else if (std::regex_match(elemStr, match, ellipseR)) {
-        m_figures.emplace_back(fig::Ellipse());
-        std::get<fig::Ellipse>(m_figures.back()).parseSvg(elemStr);
     } else if (std::regex_match(elemStr, match, lineR)) {
         m_figures.emplace_back(fig::Line());
         std::get<fig::Line>(m_figures.back()).parseSvg(elemStr);
@@ -167,9 +163,6 @@ std::ostream &operator<<(std::ostream &out, const Svg &svg) {
         switch (fig.index()) {      //TODO: find a better solution
             case fig::CIRCLE:
                 std::get<fig::Circle>(fig).print();
-                break;
-            case fig::ELLIPSE:
-                std::get<fig::Ellipse>(fig).print();
                 break;
             case fig::LINE:
                 std::get<fig::Line>(fig).print();

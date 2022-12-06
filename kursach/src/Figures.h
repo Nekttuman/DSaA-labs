@@ -19,8 +19,6 @@ namespace fig {
 
     class Circle;
 
-    class Ellipse;
-
     class Rect;
 
     class Line;
@@ -30,8 +28,7 @@ namespace fig {
     class Path;
 
 
-    typedef std::variant<fig::Circle, fig::Ellipse, fig::Line,
-            fig::Rect, fig::Polygon, fig::Path> figVariants;
+    typedef std::variant<fig::Circle, fig::Line, fig::Rect, fig::Polygon, fig::Path> figVariants;
 
 
     int getNumberFromRegex(const std::regex &reg, const std::string &svgStr);
@@ -41,7 +38,6 @@ namespace fig {
 
     enum FigureType {
         CIRCLE,
-        ELLIPSE,
         LINE,
         RECT,
         POLYGON,
@@ -84,33 +80,13 @@ namespace fig {
 
         void print() const override;
 
+        bool isPointBelongs(const fig::Point& p) const {
+            return pow(p.x - m_c.x, 2) + pow(p.y - m_c.y, 2) <= pow(m_r, 2);
+        }
+
         friend bool operator==(const Circle &left, const Circle &right);
 
         friend bool isOverlaps(const Circle &left, const figVariants &rightVariant);
-    };
-
-
-    class Ellipse : public Figure {
-        Point m_c;
-        int m_rx = 0, m_ry = 0;
-    public:
-        Ellipse() = default;
-
-        Ellipse(int cx, int cy, int rx, int ry) : m_c{cx, cy}, m_rx(rx), m_ry(ry) {}
-
-        Point getCenter() const { return m_c; }
-
-        int getXRadius() const { return m_rx; }
-
-        int getYRadius() const { return m_ry; }
-
-        void parseSvg(const std::string &svgStr) override;
-
-        void print() const override;
-
-        friend bool operator==(const Ellipse &left, const Ellipse &right);
-
-        friend bool isOverlaps(const Ellipse &left, const figVariants &right);
     };
 
 
