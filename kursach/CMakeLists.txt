@@ -3,7 +3,7 @@ project(kursach)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(kursach main.cpp src/Svg.h src/Figures.cpp src/Figures.h src/Svg.cpp src/Algorithm.cpp src/Algorithm.h src/Gcode.cpp src/Gcode.h test/AlgorithmTests.h)
+add_executable(kursach main.cpp src/Svg.h src/Figures.cpp src/Figures.h src/Svg.cpp src/Algorithm.cpp src/Algorithm.h src/Gcode.cpp src/Gcode.h test/AlgorithmTests.h test/SvgParseTest.cpp test/SvgParseTest.h test/AlgorithmTest.cpp)
 
 
 #set(SFML_STATIC_LIBRARIES TRUE)
