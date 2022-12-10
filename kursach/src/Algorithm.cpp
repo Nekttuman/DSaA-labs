@@ -14,15 +14,15 @@ int isOverlap(const fig::figVariants &left, const fig::figVariants &right) {
     //
     switch (left.index()) {
         case fig::CIRCLE:
-            return isOverlaps(std::get<fig::Circle>(left), right);
+            return doesOverlap(std::get<fig::Circle>(left), right);
         case fig::LINE:
-            return isOverlaps(std::get<fig::Line>(left), right);
+            return doesOverlap(std::get<fig::Line>(left), right);
         case fig::RECT:
-            return isOverlaps(std::get<fig::Rect>(left), right);
+            return doesOverlap(std::get<fig::Rect>(left), right);
         case fig::POLYGON:
-            return isOverlaps(std::get<fig::Polygon>(left), right);
+            return doesOverlap(std::get<fig::Polygon>(left), right);
         case fig::PATH:
-            return isOverlaps(std::get<fig::Path>(left), right);
+            return doesOverlap(std::get<fig::Path>(left), right);
     }
     return 0;
 }

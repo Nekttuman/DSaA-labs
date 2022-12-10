@@ -80,13 +80,13 @@ namespace fig {
 
         void print() const override;
 
-        bool isPointBelongs(const fig::Point &p) const {
+        bool pointBelongs(const fig::Point &p) const {
             return pow(p.x - m_c.x, 2) + pow(p.y - m_c.y, 2) <= pow(m_r, 2);
         }
 
         friend bool operator==(const Circle &left, const Circle &right);
 
-        friend bool isOverlaps(const Circle &left, fig::figVariants rightVariant);
+        friend bool doesOverlap(const Circle &left, fig::figVariants rightVariant);
     };
 
 
@@ -104,6 +104,10 @@ namespace fig {
 
         int getHeight() const { return m_height; }
 
+        bool pointBelongs(const fig::Point &p) const {
+            return p.x <= m_coord.x + m_width && p.x >= m_coord.x &&
+                   p.y <= m_coord.y+m_height && p.y >= m_coord.y;
+        }
 
         void parseSvg(const std::string &svgStr) override;
 
@@ -112,7 +116,7 @@ namespace fig {
 
         friend bool operator==(const Rect &left, const Rect &right);
 
-        friend bool isOverlaps(const Rect &left, const figVariants &right);
+        friend bool doesOverlap(const Rect &left, figVariants rightVariant);
     };
 
 
@@ -134,10 +138,10 @@ namespace fig {
 
         void print() const override;
 
+        friend bool doesOverlap(const Line &left, figVariants rightVariant);
 
         friend bool operator==(const Line &left, const Line &right);
 
-        friend bool isOverlaps(const Line &left, const figVariants &right);
     };
 
 
@@ -161,7 +165,7 @@ namespace fig {
 
         friend bool operator==(const fig::Polygon &left, const fig::Polygon &right);
 
-        friend bool isOverlaps(const Polygon &left, const figVariants &right);
+        friend bool doesOverlap(const Polygon &left, const figVariants &right);
     };
 
 
@@ -184,7 +188,7 @@ namespace fig {
 
         friend bool operator==(const Path &left, const Path &right);
 
-        friend bool isOverlaps(const Path &left, const figVariants &right);
+        friend bool doesOverlap(const Path &left, const figVariants &right);
     };
 
 
