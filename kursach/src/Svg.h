@@ -13,7 +13,7 @@
 #include "Figures.h"
 
 class Svg {
-private:
+protected:
     std::vector<fig::figVariants> m_figures;
 
     int m_height, m_width;

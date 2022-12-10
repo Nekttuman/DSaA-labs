@@ -62,7 +62,7 @@ bool Svg::parseElem(const std::string &elemStr) {
     } else if (std::regex_match(elemStr, match, polylineR) ||
                std::regex_match(elemStr, match, polygonR))
         if (std::regex_search(elemStr, match, fillNoneR)) {
-            m_figures.emplace_back(fig::Path());
+            m_figures.emplace_back(fig::Path(true));
 
             std::get<fig::Path>(m_figures.back()).parseSvg(elemStr);
         } else {

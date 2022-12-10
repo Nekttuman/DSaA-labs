@@ -9,11 +9,13 @@
 
 int fig::getNumberFromRegex(const std::regex &reg, const std::string &svgStr) {
     std::smatch match;
-    static const std::regex numberR(R"(\d+)");
+    static const std::regex numberR(R"("\d+)");
     std::regex_search(std::cbegin(svgStr), std::cend(svgStr), match, reg);
     if (match.length() == 0) throw std::runtime_error("svg format err");
     std::regex_search(std::cbegin(match[0].str()), std::cend(match[0].str()), match, numberR);
-    return std::stoi(match[0].str());
+    std::string ss = match[0].str();
+    std::string s(std::begin(ss) + 1, std::end(ss));
+    return std::stoi(s);
 }
 
 
@@ -82,7 +84,7 @@ bool fig::operator==(const fig::Circle &left, const fig::Circle &right) {
     return (left.m_c == right.m_c) && (left.m_r == right.m_r);
 }
 
-bool fig::isOverlaps(const fig::Circle &left, const fig::figVariants &rightVariant) { //TODO
+bool fig::isOverlaps(const fig::Circle &left, fig::figVariants rightVariant) { //TODO
     switch (rightVariant.index()) {
         case fig::CIRCLE: {
             auto *right = std::get_if<fig::Circle>(&rightVariant);
@@ -100,17 +102,25 @@ bool fig::isOverlaps(const fig::Circle &left, const fig::figVariants &rightVaria
         case fig::RECT: {
             auto *right = std::get_if<fig::Rect>(&rightVariant);
             fig::Point p1 = right->getPosition();
-            fig::Point p2 {p1.x, p1.y+right->getHeight()}, p3{p1.x + right->getWidth(), p1.y},
-                    p3{p1.x + right->getWidth(),p1.y+right->getHeight()};
-            return  (left.isPointBelongs(p1) && })
+            fig::Point p2{p1.x, p1.y + right->getHeight()};
+            fig::Point p3{p1.x + right->getWidth(), p1.y};
+            fig::Point p4{p1.x + right->getWidth(), p1.y + right->getHeight()};
+            return (left.isPointBelongs(p1) && left.isPointBelongs(p2) && left.isPointBelongs(p3) &&
+                    left.isPointBelongs(p4));
         }
         case fig::PATH: {
-
+            auto *right = std::get_if<fig::Path>(&rightVariant);
+            for(auto & it : *right){
+                if (!left.isPointBelongs(it))
+                    return false;
+            }
+            return true;
         }
         case fig::POLYGON: {
 
         }
     }
+
 }
 
 
@@ -151,39 +161,31 @@ void fig::Rect::parseSvg(const std::string &svgStr) {
 // Format example:
 // <line x1="0" y1="80" x2="100" y2="20" stroke="black" />
 //
-    std::regex rxR(R"(rx\s*=\s*"\d+")"), xR(R"(x\s*=\s*"\d+")"), yR(R"(y\s*=\s*"\d+")"),
-            widthR(R"(width\s*=\s*"\d+?")"), heightR(R"(height\s*=\s*"\d+?")"), ryR(R"(ry\s*=\s*"\d+")");
+    std::regex xR(R"(x\s*=\s*"\d+")"), yR(R"(y\s*=\s*"\d+")"),
+            widthR(R"(width\s*=\s*"\d+?")"), heightR(R"(height\s*=\s*"\d+?")");
     std::smatch match;
 
     m_width = getNumberFromRegex(widthR, svgStr);
     m_height = getNumberFromRegex(heightR, svgStr);
 
-    if (std::regex_match(svgStr, match, xR))
+    if (std::regex_search(svgStr, match, xR))
         m_coord.x = getNumberFromRegex(xR, svgStr);
-    if (std::regex_match(svgStr, match, yR))
+    if (std::regex_search(svgStr, match, yR))
         m_coord.y = getNumberFromRegex(yR, svgStr);
 
-    if (std::regex_match(svgStr, match, rxR)) {
-        m_rx = getNumberFromRegex(rxR, svgStr);
-        if (std::regex_match(svgStr, match, ryR))
-            m_ry = getNumberFromRegex(ryR, svgStr);
-        else
-            m_ry = m_rx;
-    }
 }
 
 void fig::Rect::print() const {
     std::cout << "Rect: pos = " << getPosition() << ", width = " << getWidth() << ", height = " <<
-              getHeight() << ", rx = " << getRx() << ", ry = " << getRy();
+              getHeight();
 }
 
 
 // friend
 
 bool fig::operator==(const fig::Rect &left, const fig::Rect &right) {
-    return (left.m_width == right.m_width) && (left.m_height == right.m_height) &&
-           (left.m_rx == right.m_rx) && (left.m_ry == right.m_ry) &&
-           (left.m_coord == right.m_coord);
+    return (left.m_width == right.m_width) && (left.m_height == right.m_height)
+           && (left.m_coord == right.m_coord);
 }
 
 bool fig::isOverlaps(const fig::Rect &left, const fig::figVariants &right) {
@@ -223,7 +225,7 @@ void fig::Polygon::print() const {
 
 // friend
 
-bool fig::operator!=(const fig::Polygon &left, const fig::Polygon &right){
+bool fig::operator!=(const fig::Polygon &left, const fig::Polygon &right) {
     return !(left == right);
 }
 

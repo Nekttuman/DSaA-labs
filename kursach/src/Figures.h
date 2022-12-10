@@ -80,24 +80,23 @@ namespace fig {
 
         void print() const override;
 
-        bool isPointBelongs(const fig::Point& p) const {
+        bool isPointBelongs(const fig::Point &p) const {
             return pow(p.x - m_c.x, 2) + pow(p.y - m_c.y, 2) <= pow(m_r, 2);
         }
 
         friend bool operator==(const Circle &left, const Circle &right);
 
-        friend bool isOverlaps(const Circle &left, const figVariants &rightVariant);
+        friend bool isOverlaps(const Circle &left, fig::figVariants rightVariant);
     };
 
 
     class Rect : public Figure {
         int m_width = 0, m_height = 0;
         Point m_coord;
-        int m_rx = 0, m_ry = 0;
     public:
         Rect() = default;
 
-        Rect(int w, int h) : m_height(h), m_width(w) {}
+        Rect(int w, int h, int x, int y) : m_height(h), m_width(w), m_coord{x, y} {}
 
         Point getPosition() const { return m_coord; }
 
@@ -105,9 +104,6 @@ namespace fig {
 
         int getHeight() const { return m_height; }
 
-        int getRx() const { return m_rx; }
-
-        int getRy() const { return m_ry; }
 
         void parseSvg(const std::string &svgStr) override;
 
@@ -151,9 +147,15 @@ namespace fig {
     public:
         Polygon() = default;
 
+        explicit Polygon(const std::vector<Point> &points) { m_points = points; }
+
         void parseSvg(const std::string &svgStr) override;
 
         void print() const override;
+
+        auto begin() { return std::begin(m_points); }
+
+        auto end() { return std::end(m_points); }
 
         friend bool operator!=(const Polygon &left, const Polygon &right);
 
@@ -170,10 +172,15 @@ namespace fig {
         explicit Path(bool fromPolygon = false) :
                 m_fromPolygon(fromPolygon) {};
 
+        explicit Path(const std::vector<Point> &points) { m_points = points; }
+
         void parseSvg(const std::string &svgStr) override;
 
         void print() const override;
 
+        auto begin() { return std::begin(m_points); }
+
+        auto end() { return std::end(m_points); }
 
         friend bool operator==(const Path &left, const Path &right);
 
