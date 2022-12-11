@@ -147,8 +147,35 @@ void fig::Line::print() const {
 // friend
 
 bool fig::doesOverlap(const fig::Line &left, figVariants rightVariant) {
-    return false; //TODO
-
+    switch (rightVariant.index()) {
+        case fig::CIRCLE:
+            return false;
+        case fig::LINE: {
+            auto *right = std::get_if<fig::Line>(&rightVariant);
+            return left.pointBelongs(right->getPoint1()) && left.pointBelongs(right->getPoint2());
+        }
+        case fig::RECT: {
+            auto *right = std::get_if<fig::Rect>(&rightVariant);
+            int rectHeight = right->getHeight(),
+                    rectWidth = right->getWidth();
+            fig::Point rectPos = right->getPosition();
+            if (rectHeight == 0)
+                return left.pointBelongs(rectPos) && left.pointBelongs({rectPos.x + rectWidth, rectPos.y});
+            else if (rectWidth == 0)
+                return left.pointBelongs(rectPos) && left.pointBelongs({rectPos.x, rectPos.y + rectHeight});
+            else return false;
+        }
+        case fig::PATH: {
+            auto *right = std::get_if<fig::Path>(&rightVariant);
+            return (std::ranges::all_of((*right).begin(), (*right).end(),
+                                        [left](fig::Point p) { return left.pointBelongs(p); }));
+        }
+        case fig::POLYGON: {
+            auto *right = std::get_if<fig::Polygon>(&rightVariant);
+            return (std::ranges::all_of((*right).begin(), (*right).end(),
+                                        [left](fig::Point p) { return left.pointBelongs(p); }));
+        }
+    }
 }
 
 

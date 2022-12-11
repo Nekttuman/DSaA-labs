@@ -106,7 +106,7 @@ namespace fig {
 
         bool pointBelongs(const fig::Point &p) const {
             return p.x <= m_coord.x + m_width && p.x >= m_coord.x &&
-                   p.y <= m_coord.y+m_height && p.y >= m_coord.y;
+                   p.y <= m_coord.y + m_height && p.y >= m_coord.y;
         }
 
         void parseSvg(const std::string &svgStr) override;
@@ -135,6 +135,16 @@ namespace fig {
         Point getPoint2() const { return two; }
 
         void parseSvg(const std::string &svgStr) override;
+
+        bool pointBelongs(const fig::Point &p) const {
+            int minx = (one.x > two.x) ? two.x : one.x;
+            int maxx = (one.x < two.x) ? two.x : one.x;
+            int miny = (one.y > two.y) ? two.y : one.y;
+            int maxy = (one.y < two.y) ? two.y : one.y;
+            return (p.y - one.y) * (two.x - one.x) == (two.y - one.y) * (p.x - one.x) &&
+                   p.x >= minx && p.x <= maxx && p.y >= miny && p.y <= maxy;;
+        }
+
 
         void print() const override;
 
