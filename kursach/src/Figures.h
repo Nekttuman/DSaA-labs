@@ -87,6 +87,8 @@ namespace fig {
         friend bool operator==(const Circle &left, const Circle &right);
 
         friend bool doesOverlap(const Circle &left, fig::figVariants rightVariant);
+
+        friend double getFiguresDistance(const fig::Circle& circle, const figVariants& figV);
     };
 
 
@@ -117,6 +119,7 @@ namespace fig {
         friend bool operator==(const Rect &left, const Rect &right);
 
         friend bool doesOverlap(const Rect &left, figVariants rightVariant);
+        friend double getFiguresDistance(const fig::Rect& rect, const figVariants& figV);
     };
 
 
@@ -129,6 +132,9 @@ namespace fig {
 
         Line(int x1, int y1, int x2, int y2) :
                 one{x1, y1}, two{x2, y2} {}
+
+        Line(fig::Point p1, fig::Point p2) :
+                one{p1}, two{p2} {}
 
         Point getPoint1() const { return one; }
 
@@ -145,12 +151,12 @@ namespace fig {
                    p.x >= minx && p.x <= maxx && p.y >= miny && p.y <= maxy;;
         }
 
-
         void print() const override;
 
         friend bool doesOverlap(const Line &left, figVariants rightVariant);
 
         friend bool operator==(const Line &left, const Line &right);
+        friend double getFiguresDistance(const fig::Line& line, const figVariants& figV);
 
     };
 
@@ -176,6 +182,7 @@ namespace fig {
         friend bool operator==(const fig::Polygon &left, const fig::Polygon &right);
 
         friend bool doesOverlap(const Polygon &left, const figVariants &right);
+        friend double getFiguresDistance(const fig::Polygon& polygon, const figVariants& figV);
     };
 
 
@@ -192,13 +199,16 @@ namespace fig {
 
         void print() const override;
 
+        const auto begin() const { return std::begin(m_points); }
         auto begin() { return std::begin(m_points); }
 
+        const auto end() const { return std::end(m_points); }
         auto end() { return std::end(m_points); }
 
         friend bool operator==(const Path &left, const Path &right);
 
-        friend bool doesOverlap(const Path &left, const figVariants &right);
+        friend bool doesOverlap(const Path &left, const figVariants &rightVariant);
+        friend double getFiguresDistance(const fig::Path& path, const figVariants& figV);
     };
 
 

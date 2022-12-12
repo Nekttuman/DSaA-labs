@@ -124,66 +124,17 @@ bool fig::doesOverlap(const fig::Circle &left, fig::figVariants rightVariant) {
 }
 
 
-/////////////////////////////////////////// LINE //////////////////////////////////////////////////
-
-void fig::Line::parseSvg(const std::string &svgStr) {
-// Format example:
-// <line x1="0" y1="80" x2="100" y2="20" stroke="black" />
-//
-    std::regex numberR(R"(\d+)"), x1R(R"(x1\s*=\s*"\d+")"),
-            x2R(R"(x2\s*=\s*"\d+")"), y1R(R"(y1\s*=\s*"\d+")"), y2R(R"(y2\s*=\s*"\d+")");
-
-    one.x = getNumberFromRegex(x1R, svgStr);
-    one.y = getNumberFromRegex(y1R, svgStr);
-    two.x = getNumberFromRegex(x2R, svgStr);
-    two.y = getNumberFromRegex(y2R, svgStr);
-}
-
-void fig::Line::print() const {
-    std::cout << "Line: p1 = " << getPoint1() << ", p2 = " << getPoint2();
-}
-
-
-// friend
-
-bool fig::doesOverlap(const fig::Line &left, figVariants rightVariant) {
-    switch (rightVariant.index()) {
+double fig::getFiguresDistance(const fig::Circle& circle, const figVariants& figV){ //TODO
+    switch(figV.index()){
         case fig::CIRCLE:
-            return false;
-        case fig::LINE: {
-            auto *right = std::get_if<fig::Line>(&rightVariant);
-            return left.pointBelongs(right->getPoint1()) && left.pointBelongs(right->getPoint2());
-        }
-        case fig::RECT: {
-            auto *right = std::get_if<fig::Rect>(&rightVariant);
-            int rectHeight = right->getHeight(),
-                    rectWidth = right->getWidth();
-            fig::Point rectPos = right->getPosition();
-            if (rectHeight == 0)
-                return left.pointBelongs(rectPos) && left.pointBelongs({rectPos.x + rectWidth, rectPos.y});
-            else if (rectWidth == 0)
-                return left.pointBelongs(rectPos) && left.pointBelongs({rectPos.x, rectPos.y + rectHeight});
-            else return false;
-        }
-        case fig::PATH: {
-            auto *right = std::get_if<fig::Path>(&rightVariant);
-            return (std::ranges::all_of((*right).begin(), (*right).end(),
-                                        [left](fig::Point p) { return left.pointBelongs(p); }));
-        }
-        case fig::POLYGON: {
-            auto *right = std::get_if<fig::Polygon>(&rightVariant);
-            return (std::ranges::all_of((*right).begin(), (*right).end(),
-                                        [left](fig::Point p) { return left.pointBelongs(p); }));
-        }
+        case fig::LINE:
+        case fig::RECT:
+        case fig::POLYGON:
+        case fig::PATH:
+            break;
     }
+    return 0;
 }
-
-
-bool fig::operator==(const fig::Line &left, const fig::Line &right) {
-    return (left.one == right.one) && (left.two == right.two);
-}
-
-
 
 /////////////////////////////////////////// RECT //////////////////////////////////////////////////
 
@@ -261,6 +212,74 @@ bool fig::doesOverlap(const fig::Rect &left, fig::figVariants rightVariant) {
     return false; //TODO implement
 }
 
+double fig::getFiguresDistance(const fig::Rect &rect, const fig::figVariants &figV) {
+    return 0;  //TODO
+}
+
+
+/////////////////////////////////////////// LINE //////////////////////////////////////////////////
+
+void fig::Line::parseSvg(const std::string &svgStr) {
+// Format example:
+// <line x1="0" y1="80" x2="100" y2="20" stroke="black" />
+//
+    std::regex numberR(R"(\d+)"), x1R(R"(x1\s*=\s*"\d+")"),
+            x2R(R"(x2\s*=\s*"\d+")"), y1R(R"(y1\s*=\s*"\d+")"), y2R(R"(y2\s*=\s*"\d+")");
+
+    one.x = getNumberFromRegex(x1R, svgStr);
+    one.y = getNumberFromRegex(y1R, svgStr);
+    two.x = getNumberFromRegex(x2R, svgStr);
+    two.y = getNumberFromRegex(y2R, svgStr);
+}
+
+void fig::Line::print() const {
+    std::cout << "Line: p1 = " << getPoint1() << ", p2 = " << getPoint2();
+}
+
+
+// friend
+
+bool fig::doesOverlap(const fig::Line &left, figVariants rightVariant) {
+    switch (rightVariant.index()) {
+        case fig::CIRCLE:
+            return false;
+        case fig::LINE: {
+            auto *right = std::get_if<fig::Line>(&rightVariant);
+            return left.pointBelongs(right->getPoint1()) && left.pointBelongs(right->getPoint2());
+        }
+        case fig::RECT: {
+            auto *right = std::get_if<fig::Rect>(&rightVariant);
+            int rectHeight = right->getHeight(),
+                    rectWidth = right->getWidth();
+            fig::Point rectPos = right->getPosition();
+            if (rectHeight == 0)
+                return left.pointBelongs(rectPos) && left.pointBelongs({rectPos.x + rectWidth, rectPos.y});
+            else if (rectWidth == 0)
+                return left.pointBelongs(rectPos) && left.pointBelongs({rectPos.x, rectPos.y + rectHeight});
+            else return false;
+        }
+        case fig::PATH: {
+            auto *right = std::get_if<fig::Path>(&rightVariant);
+            return (std::ranges::all_of((*right).begin(), (*right).end(),
+                                        [left](fig::Point p) { return left.pointBelongs(p); }));
+        }
+        case fig::POLYGON: {
+            auto *right = std::get_if<fig::Polygon>(&rightVariant);
+            return (std::ranges::all_of((*right).begin(), (*right).end(),
+                                        [left](fig::Point p) { return left.pointBelongs(p); }));
+        }
+    }
+}
+
+
+bool fig::operator==(const fig::Line &left, const fig::Line &right) {
+    return (left.one == right.one) && (left.two == right.two);
+}
+
+double fig::getFiguresDistance(const fig::Line &line, const fig::figVariants &figV) {
+    return 0;  //TODO
+}
+
 
 /////////////////////////////////////////// POLYGON //////////////////////////////////////////////////
 
@@ -325,6 +344,10 @@ bool fig::doesOverlap(const fig::Polygon &left, const fig::figVariants &right) {
     return false; //TODO implement
 }
 
+double fig::getFiguresDistance(const fig::Polygon &polygon, const fig::figVariants &figV) {
+    return 0; //TODO
+}
+
 /////////////////////////////////////////// PATH //////////////////////////////////////////////////
 
 void fig::Path::parseSvg(const std::string &svgStr) {
@@ -374,6 +397,45 @@ bool fig::operator==(const fig::Path &left, const fig::Path &right) {
     return true;
 }
 
-bool fig::doesOverlap(const fig::Path &left, const fig::figVariants &right) {
-    return false; //TODO implement
+bool fig::doesOverlap(const fig::Path &left, const fig::figVariants &rightVariant) {
+    switch (rightVariant.index()) {
+        case fig::CIRCLE:
+            return false;
+        case fig::LINE: {
+            auto *right = std::get_if<fig::Line>(&rightVariant);
+
+            for (auto it = left.begin(); it != left.end()-1; ++it){
+                fig::Line seg{*it, *(it+1)};
+                if (doesOverlap(seg, *right))
+                    return true;
+            }
+            return false;
+        }
+        case fig::RECT: {
+            auto *right = std::get_if<fig::Rect>(&rightVariant);
+            int rectHeight = right->getHeight(),
+                    rectWidth = right->getWidth();
+            fig::Point rectPos = right->getPosition();
+            if (rectHeight == 0)
+                return doesOverlap(left, fig::Line(rectPos, {rectPos.x + rectWidth, rectPos.y}));
+            else if (rectWidth == 0)
+                return doesOverlap(left, fig::Line(rectPos, {rectPos.x, rectPos.y + rectHeight}));
+            else return false;
+        }
+        case fig::PATH: {
+            auto *right = std::get_if<fig::Path>(&rightVariant);
+            // TODO: implement
+            throw std::runtime_error("not implemented");
+        }
+        case fig::POLYGON: {
+            auto *right = std::get_if<fig::Polygon>(&rightVariant);
+            // TODO: implement
+            throw std::runtime_error("not implemented");
+            // return true if the polygon is degenerate into a overlaped line
+        }
+    }
+}
+
+double fig::getFiguresDistance(const fig::Path &path, const fig::figVariants &figV) {
+    return 0;  //TODO
 }

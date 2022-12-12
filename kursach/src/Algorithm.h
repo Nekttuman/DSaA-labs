@@ -10,12 +10,15 @@
 #include "Gcode.h"
 
 
-int isOverlap(const fig::figVariants &left, const fig::figVariants &right);
+int doesOverlap(const fig::figVariants &left, const fig::figVariants &right);
 
 class Algorithm {
 protected:          // for AlgorithmTest class
     Svg svg;
     Gcode gcode;
+
+private:
+    std::vector<int> figuresDrawingOrder;
 
 public:
     void parseSvg(const std::string &path);
@@ -26,9 +29,11 @@ public:
 
     void mergeIntersectFigures();
 
-    void sliceFigures() {}
+    void setFiguresDrawingOrder();
 
-    void generateGcode() {}
+    void sliceFigures();
+
+    void writeGcodeFile(const std::string& filepath){}
 };
 
 
