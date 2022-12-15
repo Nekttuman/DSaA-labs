@@ -31,6 +31,9 @@ public:
 
     unsigned getFiguresCount() { return m_figures.size(); }
 
+    int getHeight() { return m_height; }
+    int getWidth() { return m_width; }
+
     void empty();
 
     // TODO: create decent iterator

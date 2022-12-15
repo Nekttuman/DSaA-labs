@@ -49,6 +49,22 @@ double fig::getDistance(fig::Point a, fig::Point b) {
 }
 
 
+double fig::getDistance(fig::Line line, fig::Point point) {
+    if (line.pointBelongs(point))
+        return 0;
+    double A = line.getPoint1().y - line.getPoint2().y;
+    double B = line.getPoint1().x - line.getPoint2().x;
+    double C = line.getPoint1().y * line.getPoint2().x - line.getPoint2().y * line.getPoint1().x;
+    double H = (A * point.x + B * point.y + C) / sqrt(A * A + B * B);
+    H = H > 0 ? H : -H;
+    double d1 = getDistance(point, line.getPoint1()), d2 = getDistance(point, line.getPoint2());
+
+    if (H == 0)
+        return std::min(d1, d2);
+    return std::min(d1, std::min(d2, H));
+}
+
+
 /////////////////////////////////////////// POINT /////////////////////////////////////////////////
 
 bool fig::Point::operator==(const fig::Point &other) const {
@@ -124,14 +140,59 @@ bool fig::doesOverlap(const fig::Circle &left, fig::figVariants rightVariant) {
 }
 
 
-double fig::getFiguresDistance(const fig::Circle& circle, const figVariants& figV){ //TODO
-    switch(figV.index()){
-        case fig::CIRCLE:
-        case fig::LINE:
-        case fig::RECT:
-        case fig::POLYGON:
-        case fig::PATH:
-            break;
+double fig::getFiguresDistance(const fig::Circle &circle, const figVariants &figV) { //TODO
+    switch (figV.index()) {
+        case fig::CIRCLE: {
+            fig::Circle rCircle = std::get<fig::Circle>(figV);
+            double d = getDistance(circle.getCenter(), rCircle.getCenter())
+                       - circle.getRadius() - rCircle.getRadius();
+            return d < 0 ? 0 : d;
+        }
+        case fig::LINE: {
+            fig::Line line = std::get<fig::Line>(figV);
+            // return min distance between circle center and line ends
+            // due to the specifics of the drawing algorithm
+            return std::min(getDistance(circle.getCenter(), line.getPoint1()),
+                            getDistance(circle.getCenter(), line.getPoint2())) - (double) circle.getRadius();
+
+        }
+        case fig::RECT: {
+            // return min distance between circle center and rectangle sides
+            fig::Rect rect = std::get<fig::Rect>(figV);
+            fig::Point p1{rect.getPosition()},
+                    p2{rect.getPosition().x + rect.getWidth(), rect.getPosition().y},
+                    p3{rect.getPosition().x + rect.getWidth(), rect.getPosition().y + rect.getHeight()},
+                    p4{rect.getPosition().x, rect.getPosition().y + rect.getHeight()};
+
+            fig::Point trgPoint = circle.getCenter();
+
+            double d[] = {getDistance({p1, p2}, trgPoint), getDistance({p2, p3}, trgPoint),
+                          getDistance({p3, p4}, trgPoint), getDistance({p4, p1}, trgPoint)};
+
+            return (*std::min_element(std::begin(d), std::end(d))) - (double) circle.getRadius();
+        }
+        case fig::POLYGON: {
+            fig::Polygon poly = std::get<fig::Polygon>(figV);
+            fig::Point trgPoint = circle.getCenter();
+            std::vector<double> d;
+            d.reserve(poly.getPointsCount());
+            for (auto p = poly.begin(); p != poly.end() - 1; ++p)
+                d.push_back(getDistance({*p, *(p + 1)}, trgPoint));
+            d.push_back(getDistance({*poly.begin(), *(poly.end() - 1)}, trgPoint));
+
+            return (*std::min_element(std::begin(d), std::end(d))) - (double) circle.getRadius();
+        }
+        case fig::PATH: {
+            fig::Path path = std::get<fig::Path>(figV);
+            fig::Point trgPoint = circle.getCenter();
+            std::vector<double> d;
+            d.reserve(path.getPointsCount());
+            for (auto p = path.begin(); p != path.end() - 1; ++p)
+                d.push_back(getDistance({*p, *(p + 1)}, trgPoint));
+            d.push_back(getDistance({*path.begin(), *(path.end() - 1)}, trgPoint));
+
+            return (*std::min_element(std::begin(d), std::end(d))) - (double) circle.getRadius();
+        }
     }
     return 0;
 }
@@ -404,8 +465,8 @@ bool fig::doesOverlap(const fig::Path &left, const fig::figVariants &rightVarian
         case fig::LINE: {
             auto *right = std::get_if<fig::Line>(&rightVariant);
 
-            for (auto it = left.begin(); it != left.end()-1; ++it){
-                fig::Line seg{*it, *(it+1)};
+            for (auto it = left.begin(); it != left.end() - 1; ++it) {
+                fig::Line seg{*it, *(it + 1)};
                 if (doesOverlap(seg, *right))
                     return true;
             }

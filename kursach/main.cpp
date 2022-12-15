@@ -1,10 +1,13 @@
 #include "src/Algorithm.h"
 
 #include "test/AlgorithmTests.h"
+#include "test/SvgParseTest.h"
+#include "test/FigTests.h"
 
 int main() {
-//    Algorithm alg;
+    Algorithm alg;
 //    alg.parseSvg("../test.svg");
+//    alg.drawParsed();
 //    alg.logSvg();
 //    alg.setGcodeFilePath("../test.gcode");
 //
@@ -14,7 +17,13 @@ int main() {
 //    alg.sliceFigures();
 //    alg.generateGcode();
 
-    AlgorithmTests algTest;
-    algTest.startTests();
+FigTests fTest;
+fTest.startFigTests();
+
+//    SvgParseTest spTest;
+//    spTest.startTests();
+//
+//    AlgorithmTests algTest;
+//    algTest.startTests();
     return 0;
 }

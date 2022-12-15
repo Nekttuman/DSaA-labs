@@ -34,7 +34,7 @@ namespace fig {
     int getNumberFromRegex(const std::regex &reg, const std::string &svgStr);
 
     double getDistance(Point a, Point b);
-
+    double getDistance(fig::Line line, fig::Point point);
 
     enum FigureType {
         CIRCLE,
@@ -173,8 +173,12 @@ namespace fig {
 
         void print() const override;
 
+        unsigned getPointsCount(){return m_points.size();}
+
+        const auto begin() const { return std::begin(m_points); }
         auto begin() { return std::begin(m_points); }
 
+        const auto end() const { return std::end(m_points); }
         auto end() { return std::end(m_points); }
 
         friend bool operator!=(const Polygon &left, const Polygon &right);
@@ -198,6 +202,8 @@ namespace fig {
         void parseSvg(const std::string &svgStr) override;
 
         void print() const override;
+
+        unsigned getPointsCount(){return m_points.size();}
 
         const auto begin() const { return std::begin(m_points); }
         auto begin() { return std::begin(m_points); }

@@ -25,6 +25,8 @@ public:
 
     void logSvg();
 
+    int drawParsed();
+
     void setGcodeFilePath(const std::string &path);
 
     void mergeIntersectFigures();
