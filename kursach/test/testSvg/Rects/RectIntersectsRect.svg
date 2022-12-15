@@ -1,0 +1,9 @@
+<svg version="1.1"
+     width="300" height="200"
+     xmlns="http://www.w3.org/2000/svg">
+
+    <rect width="100" height="200" fill="grey" x="100" y = "40"/>
+
+    <rect width="200" height="400" fill="blue" x="180" y = "140"/>
+
+</svg>
