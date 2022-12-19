@@ -12,6 +12,8 @@
 #include <iostream>
 #include <cmath>
 #include <variant>
+#include <numeric>
+#include <list>
 
 namespace fig {
 
@@ -21,24 +23,25 @@ namespace fig {
 
     class Rect;
 
-    class Line;
+    class Segment;
 
     class Polygon;
 
     class Path;
 
 
-    typedef std::variant<fig::Circle, fig::Line, fig::Rect, fig::Polygon, fig::Path> figVariants;
+    typedef std::variant<fig::Circle, fig::Segment, fig::Rect, fig::Polygon, fig::Path> figVariants;
 
 
     int getNumberFromRegex(const std::regex &reg, const std::string &svgStr);
 
     double getDistance(Point a, Point b);
-    double getDistance(fig::Line line, fig::Point point);
+
+    double getDistance(const Segment &line, fig::Point point);
 
     enum FigureType {
         CIRCLE,
-        LINE,
+        SEGMENT,
         RECT,
         POLYGON,
         PATH,
@@ -46,7 +49,7 @@ namespace fig {
 
 
     struct Point {
-        int x = 0, y = 0;
+        double x = 0, y = 0;
 
         bool operator==(const Point &other) const;
 
@@ -64,13 +67,21 @@ namespace fig {
     };
 
 
+    struct slicedFig{
+        fig::FigureType ft;
+        fig::Point startP, endP;
+        std::list<fig::Point> points;
+    };
+
+
+
     class Circle : public Figure {
         Point m_c;
         int m_r = 0;
     public:
         Circle() = default;
 
-        Circle(int cx, int cy, int r) : m_c{cx, cy}, m_r(r) {}
+        Circle(double cx, double cy, int r) : m_c{cx, cy}, m_r(r) {}
 
         Point getCenter() const { return m_c; }
 
@@ -80,6 +91,8 @@ namespace fig {
 
         void print() const override;
 
+        fig::Point getNearestPoint(const fig::figVariants &figVariant) const;
+
         bool pointBelongs(const fig::Point &p) const {
             return pow(p.x - m_c.x, 2) + pow(p.y - m_c.y, 2) <= pow(m_r, 2);
         }
@@ -88,7 +101,7 @@ namespace fig {
 
         friend bool doesOverlap(const Circle &left, fig::figVariants rightVariant);
 
-        friend double getFiguresDistance(const fig::Circle& circle, const figVariants& figV);
+        friend double getFiguresDistance(const fig::Circle &circle, const figVariants &figV);
     };
 
 
@@ -98,7 +111,7 @@ namespace fig {
     public:
         Rect() = default;
 
-        Rect(int w, int h, int x, int y) : m_height(h), m_width(w), m_coord{x, y} {}
+        Rect(int w, int h, double x, double y) : m_height(h), m_width(w), m_coord{x, y} {}
 
         Point getPosition() const { return m_coord; }
 
@@ -115,25 +128,30 @@ namespace fig {
 
         void print() const override;
 
+        fig::Point getNearestPoint(const fig::figVariants &figV) const;
+
 
         friend bool operator==(const Rect &left, const Rect &right);
 
         friend bool doesOverlap(const Rect &left, figVariants rightVariant);
-        friend double getFiguresDistance(const fig::Rect& rect, const figVariants& figV);
+
+        friend double getFiguresDistance(const fig::Rect &lRect, const figVariants &figV);
     };
 
 
 //////////////////////////////// POINT-BASED FIGURES //////////////////////////////////////////////
 
-    class Line : public Figure {
+
+
+    class Segment : public Figure {
         Point one, two;
     public:
-        Line() = default;
+        Segment() = default;
 
-        Line(int x1, int y1, int x2, int y2) :
+        Segment(double x1, double y1, double x2, double y2) :
                 one{x1, y1}, two{x2, y2} {}
 
-        Line(fig::Point p1, fig::Point p2) :
+        Segment(fig::Point p1, fig::Point p2) :
                 one{p1}, two{p2} {}
 
         Point getPoint1() const { return one; }
@@ -143,20 +161,25 @@ namespace fig {
         void parseSvg(const std::string &svgStr) override;
 
         bool pointBelongs(const fig::Point &p) const {
-            int minx = (one.x > two.x) ? two.x : one.x;
-            int maxx = (one.x < two.x) ? two.x : one.x;
-            int miny = (one.y > two.y) ? two.y : one.y;
-            int maxy = (one.y < two.y) ? two.y : one.y;
-            return (p.y - one.y) * (two.x - one.x) == (two.y - one.y) * (p.x - one.x) &&
+            double minx = (one.x > two.x) ? two.x : one.x;
+            double maxx = (one.x < two.x) ? two.x : one.x;
+            double miny = (one.y > two.y) ? two.y : one.y;
+            double maxy = (one.y < two.y) ? two.y : one.y;
+            bool belongsLine =  (p.y - one.y) * (two.x - one.x) - (two.y - one.y) * (p.x - one.x) <= std::numeric_limits<double>::epsilon();
+
+            return belongsLine &&
                    p.x >= minx && p.x <= maxx && p.y >= miny && p.y <= maxy;;
         }
 
         void print() const override;
 
-        friend bool doesOverlap(const Line &left, figVariants rightVariant);
+        fig::Point getNearestPoint(const fig::figVariants &figV) const;
 
-        friend bool operator==(const Line &left, const Line &right);
-        friend double getFiguresDistance(const fig::Line& line, const figVariants& figV);
+        friend bool doesOverlap(const Segment &left, figVariants rightVariant);
+
+        friend bool operator==(const Segment &left, const Segment &right);
+
+        friend double getFiguresDistance(const fig::Segment &seg, const figVariants &figV);
 
     };
 
@@ -173,12 +196,16 @@ namespace fig {
 
         void print() const override;
 
-        unsigned getPointsCount(){return m_points.size();}
+        fig::Point getNearestPoint(const fig::figVariants &fig) const;
+
+        unsigned getPointsCount() { return m_points.size(); }
 
         const auto begin() const { return std::begin(m_points); }
+
         auto begin() { return std::begin(m_points); }
 
         const auto end() const { return std::end(m_points); }
+
         auto end() { return std::end(m_points); }
 
         friend bool operator!=(const Polygon &left, const Polygon &right);
@@ -186,7 +213,8 @@ namespace fig {
         friend bool operator==(const fig::Polygon &left, const fig::Polygon &right);
 
         friend bool doesOverlap(const Polygon &left, const figVariants &right);
-        friend double getFiguresDistance(const fig::Polygon& polygon, const figVariants& figV);
+
+        friend double getFiguresDistance(const fig::Polygon &polygon, const figVariants &figV);
     };
 
 
@@ -203,18 +231,23 @@ namespace fig {
 
         void print() const override;
 
-        unsigned getPointsCount(){return m_points.size();}
+        fig::Point getNearestPoint(const fig::figVariants &fig) const;
+
+        unsigned getPointsCount() { return m_points.size(); }
 
         const auto begin() const { return std::begin(m_points); }
+
         auto begin() { return std::begin(m_points); }
 
         const auto end() const { return std::end(m_points); }
+
         auto end() { return std::end(m_points); }
 
         friend bool operator==(const Path &left, const Path &right);
 
         friend bool doesOverlap(const Path &left, const figVariants &rightVariant);
-        friend double getFiguresDistance(const fig::Path& path, const figVariants& figV);
+
+        friend double getFiguresDistance(const fig::Path &path, const figVariants &figV);
     };
 
 

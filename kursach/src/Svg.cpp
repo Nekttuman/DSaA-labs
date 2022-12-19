@@ -54,8 +54,8 @@ bool Svg::parseElem(const std::string &elemStr) {
         m_figures.emplace_back(fig::Circle());
         std::get<fig::Circle>(m_figures.back()).parseSvg(elemStr);
     } else if (std::regex_match(elemStr, match, lineR)) {
-        m_figures.emplace_back(fig::Line());
-        std::get<fig::Line>(m_figures.back()).parseSvg(elemStr);
+        m_figures.emplace_back(fig::Segment());
+        std::get<fig::Segment>(m_figures.back()).parseSvg(elemStr);
     } else if (std::regex_match(elemStr, match, rectR)) {
         m_figures.emplace_back(fig::Rect());
         std::get<fig::Rect>(m_figures.back()).parseSvg(elemStr);
@@ -164,8 +164,8 @@ std::ostream &operator<<(std::ostream &out, const Svg &svg) {
             case fig::CIRCLE:
                 std::get<fig::Circle>(fig).print();
                 break;
-            case fig::LINE:
-                std::get<fig::Line>(fig).print();
+            case fig::SEGMENT:
+                std::get<fig::Segment>(fig).print();
                 break;
             case fig::RECT:
                 std::get<fig::Rect>(fig).print();

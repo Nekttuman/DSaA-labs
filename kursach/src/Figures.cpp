@@ -31,8 +31,8 @@ bool operator==(const fig::figVariants &left, const fig::figVariants &right) {
     switch (left.index()) {
         case fig::CIRCLE:
             return std::get<fig::Circle>(left) == std::get<fig::Circle>(right);
-        case fig::LINE:
-            return std::get<fig::Line>(left) == std::get<fig::Line>(right);
+        case fig::SEGMENT:
+            return std::get<fig::Segment>(left) == std::get<fig::Segment>(right);
         case fig::RECT:
             return std::get<fig::Rect>(left) == std::get<fig::Rect>(right);
         case fig::POLYGON:
@@ -49,7 +49,7 @@ double fig::getDistance(fig::Point a, fig::Point b) {
 }
 
 
-double fig::getDistance(fig::Line line, fig::Point point) {
+double fig::getDistance(const Segment &line, fig::Point point) {
     if (line.pointBelongs(point))
         return 0;
     double A = line.getPoint1().y - line.getPoint2().y;
@@ -57,9 +57,10 @@ double fig::getDistance(fig::Line line, fig::Point point) {
     double C = line.getPoint1().y * line.getPoint2().x - line.getPoint2().y * line.getPoint1().x;
     double H = (A * point.x + B * point.y + C) / sqrt(A * A + B * B);
     H = H > 0 ? H : -H;
-    double d1 = getDistance(point, line.getPoint1()), d2 = getDistance(point, line.getPoint2());
+    double d1 = getDistance(point, line.getPoint1()),
+            d2 = getDistance(point, line.getPoint2());
 
-    if (H == 0)
+    if (H == 0) // point belongs line, but doesnt belong segment
         return std::min(d1, d2);
     return std::min(d1, std::min(d2, H));
 }
@@ -68,7 +69,7 @@ double fig::getDistance(fig::Line line, fig::Point point) {
 /////////////////////////////////////////// POINT /////////////////////////////////////////////////
 
 bool fig::Point::operator==(const fig::Point &other) const {
-    return x == other.x && y == other.y;
+    return (x == other.x && y == other.y);
 }
 
 bool fig::Point::operator!=(const fig::Point &other) const {
@@ -109,8 +110,8 @@ bool fig::doesOverlap(const fig::Circle &left, fig::figVariants rightVariant) {
             return (left.getRadius() >= right->getRadius()) &&
                    (d + right->getRadius() <= left.getRadius());
         }
-        case fig::LINE: {
-            auto *right = std::get_if<fig::Line>(&rightVariant);
+        case fig::SEGMENT: {
+            auto *right = std::get_if<fig::Segment>(&rightVariant);
             bool firstInCircle = left.pointBelongs(right->getPoint1());
             bool secondInCircle = left.pointBelongs(right->getPoint2());
 
@@ -136,7 +137,7 @@ bool fig::doesOverlap(const fig::Circle &left, fig::figVariants rightVariant) {
                                         [left](fig::Point p) { return left.pointBelongs(p); }));
         }
     }
-
+    return false;
 }
 
 
@@ -148,8 +149,8 @@ double fig::getFiguresDistance(const fig::Circle &circle, const figVariants &fig
                        - circle.getRadius() - rCircle.getRadius();
             return d < 0 ? 0 : d;
         }
-        case fig::LINE: {
-            fig::Line line = std::get<fig::Line>(figV);
+        case fig::SEGMENT: {
+            fig::Segment line = std::get<fig::Segment>(figV);
             // return min distance between circle center and line ends
             // due to the specifics of the drawing algorithm
             return std::min(getDistance(circle.getCenter(), line.getPoint1()),
@@ -161,13 +162,26 @@ double fig::getFiguresDistance(const fig::Circle &circle, const figVariants &fig
             fig::Rect rect = std::get<fig::Rect>(figV);
             fig::Point p1{rect.getPosition()},
                     p2{rect.getPosition().x + rect.getWidth(), rect.getPosition().y},
-                    p3{rect.getPosition().x + rect.getWidth(), rect.getPosition().y + rect.getHeight()},
-                    p4{rect.getPosition().x, rect.getPosition().y + rect.getHeight()};
+                    p3{rect.getPosition().x + rect.getWidth(), rect.getPosition().y - rect.getHeight()},
+                    p4{rect.getPosition().x, rect.getPosition().y - rect.getHeight()};
 
-            fig::Point trgPoint = circle.getCenter();
+            fig::Point trgtPoint = circle.getCenter();
+            int circleRadius = circle.getRadius();
 
-            double d[] = {getDistance({p1, p2}, trgPoint), getDistance({p2, p3}, trgPoint),
-                          getDistance({p3, p4}, trgPoint), getDistance({p4, p1}, trgPoint)};
+            fig::Segment lines[] = {{p1, p2},
+                                    {p2, p3},
+                                    {p3, p4},
+                                    {p4, p1}};
+            double d[4];
+            double ds;
+            for (int i = 0; i < 4; ++i) {
+                ds = getDistance(lines[i], trgtPoint);
+                if (ds <= circleRadius)
+                    d[i] = std::min(getDistance(lines[i].getPoint1(), trgtPoint),
+                                    getDistance(lines[i].getPoint2(), trgtPoint));
+                else
+                    d[i] = ds;
+            }
 
             return (*std::min_element(std::begin(d), std::end(d))) - (double) circle.getRadius();
         }
@@ -195,6 +209,94 @@ double fig::getFiguresDistance(const fig::Circle &circle, const figVariants &fig
         }
     }
     return 0;
+}
+
+
+fig::Point getNearestPointForCircleAndPoint(const fig::Circle &circle, const fig::Point &point) {
+    double x0 = circle.getCenter().x, y0 = circle.getCenter().y, r = circle.getRadius();
+    double x1 = point.x, y1 = point.y;
+
+    double k, b;
+    if (x0 - x1 != 0) {
+        k = (y0 - y1) / (x0 - x1);
+        b = -x1 * (y0 - y1) / (x0 - x1) + y1;
+    } else {
+        double Y = y0 + ((y1 > y0) ? +r : -r);
+
+        return {x0, Y};
+    }
+
+    double A = (k * k + 1),
+            B = 2 * (k * b - k * y0 - x0),
+            C = b * b + y0 * y0 + x0 * x0 - r * r - 2 * b * y0;
+
+    double D = B * B - 4 * A * C;
+
+    double X1, Y1, X2, Y2;
+    if (A != 0) {
+        X1 = (-B - sqrt(D)) / (2 * A);
+        X2 = (-B + sqrt(D)) / (2 * A);
+    } else {
+        X1 = -C / B;
+        X2 = -C / B;
+    }
+    Y1 = k * X1 + b;
+    Y2 = k * X2 + b;
+
+    if (fig::Segment(circle.getCenter(), point).pointBelongs({X1, Y1}))
+        return {X1, Y1};
+    return {X2, Y2};
+}
+
+#include <float.h>
+
+fig::Point fig::Circle::getNearestPoint(const fig::figVariants &figVariant) const {
+    switch (figVariant.index()) {
+        case fig::CIRCLE: {
+            fig::Circle circle = std::get<fig::Circle>(figVariant);
+            return getNearestPointForCircleAndPoint(*this, circle.getCenter());
+
+        }
+        case fig::SEGMENT: {
+            fig::Segment segment = std::get<fig::Segment>(figVariant);
+            fig::Point minP;
+            if (getDistance(m_c, segment.getPoint1()) < getDistance(m_c, segment.getPoint2()))
+                minP = segment.getPoint1();
+            else
+                minP = segment.getPoint2();
+            return getNearestPointForCircleAndPoint(*this, minP);
+        }
+        case fig::RECT: {
+            fig::Rect rect = std::get<fig::Rect>(figVariant);
+
+            fig::Point rectVerts[] = {
+                    rect.getPosition(),
+                    {rect.getPosition().x, rect.getPosition().y + rect.getHeight()},
+                    {rect.getPosition().x + rect.getWidth(), rect.getPosition().y},
+                    {rect.getPosition().x + rect.getWidth(), rect.getPosition().y + rect.getHeight()},
+            };
+
+            auto minDist = DBL_MAX;
+            fig::Point nearestPoint;
+            for (auto v: rectVerts) {
+                if (getDistance(m_c, v) < minDist) {
+                    minDist = getDistance(m_c, v);
+                    nearestPoint = v;
+                }
+            };
+
+            return getNearestPointForCircleAndPoint(*this, nearestPoint);
+        }
+
+        case fig::POLYGON:
+
+        case fig::PATH:
+
+            break;
+    }
+
+
+    return {}; //TODO
 }
 
 /////////////////////////////////////////// RECT //////////////////////////////////////////////////
@@ -251,8 +353,8 @@ bool fig::doesOverlap(const fig::Rect &left, fig::figVariants rightVariant) {
                     left.pointBelongs({rightCoord.x + rWidth, rightCoord.y + rHeight}) &&
                     left.pointBelongs({rightCoord.x, rightCoord.y + rHeight}));
         }
-        case fig::LINE: {
-            auto *right = std::get_if<fig::Line>(&rightVariant);
+        case fig::SEGMENT: {
+            auto *right = std::get_if<fig::Segment>(&rightVariant);
             return (left.pointBelongs(right->getPoint1()) && left.pointBelongs(right->getPoint2()));
         }
         case fig::PATH: {
@@ -273,14 +375,128 @@ bool fig::doesOverlap(const fig::Rect &left, fig::figVariants rightVariant) {
     return false; //TODO implement
 }
 
-double fig::getFiguresDistance(const fig::Rect &rect, const fig::figVariants &figV) {
+
+fig::Point fig::Rect::getNearestPoint(const fig::figVariants &figV) const {
+    switch (figV.index()) {
+        case fig::CIRCLE: {
+            fig::Circle circle = std::get<fig::Circle>(figV);
+
+            fig::Point rectVerts[] = {
+                    getPosition(),
+                    {getPosition().x, getPosition().y + getHeight()},
+                    {getPosition().x + getWidth(), getPosition().y},
+                    {getPosition().x + getWidth(), getPosition().y + getHeight()},
+            };
+
+            auto minDist = DBL_MAX;
+            fig::Point nearestPoint;
+            for (auto v: rectVerts) {
+                if (getDistance(circle.getCenter(), v) < minDist) {
+                    minDist = getDistance(circle.getCenter(), v);
+                    nearestPoint = v;
+                }
+            };
+
+            return nearestPoint;
+        }
+        case fig::SEGMENT: {
+            fig::Segment segment = std::get<fig::Segment>(figV);
+            fig::Point rectVerts[] = {
+                    getPosition(),
+                    {getPosition().x, getPosition().y + getHeight()},
+                    {getPosition().x + getWidth(), getPosition().y},
+                    {getPosition().x + getWidth(), getPosition().y + getHeight()},
+            };
+            fig::Point segmentVerts[] = {
+                    segment.getPoint1(),
+                    segment.getPoint2()};
+
+            auto minDist = DBL_MAX;
+            fig::Point nearestPoint;
+            for (auto vS: segmentVerts) {
+                for (auto vR: rectVerts) {
+                    if (getDistance(vS, vR) < minDist) {
+                        minDist = getDistance(vS, vR);
+                        nearestPoint = vR;
+                    }
+                }
+            }
+
+            return nearestPoint;
+        }
+        case fig::RECT: {
+            fig::Rect rect = std::get<fig::Rect>(figV);
+
+            fig::Point lRectVerts[] = {
+                    m_coord,
+                    {m_coord.x, m_coord.y + getHeight()},
+                    {m_coord.x + getWidth(), m_coord.y},
+                    {m_coord.x + getWidth(), m_coord.y + getHeight()},
+            };
+            fig::Point rRectVerts[] = {
+                    rect.getPosition(),
+                    {rect.getPosition().x, rect.getPosition().y + rect.getHeight()},
+                    {rect.getPosition().x + rect.getWidth(), rect.getPosition().y},
+                    {rect.getPosition().x + rect.getWidth(), rect.getPosition().y + getHeight()},
+            };
+
+            auto minDist = DBL_MAX;
+            fig::Point nearestPoint;
+            for (auto vS: rRectVerts) {
+                for (auto vR: lRectVerts) {
+                    if (getDistance(vS, vR) < minDist) {
+                        minDist = getDistance(vS, vR);
+                        nearestPoint = vR;
+                    }
+                }
+            }
+
+            return nearestPoint;
+        }
+
+        case fig::POLYGON:
+
+        case fig::PATH:
+
+            break;
+    }
+
+
+    return {}; //TODO
+
+}
+
+double fig::getFiguresDistance(const fig::Rect &lRect, const fig::figVariants &figV) {
+    switch (figV.index()) {
+        case fig::CIRCLE: {
+            fig::Circle circle = std::get<fig::Circle>(figV);
+            return getDistance(lRect.getNearestPoint(circle), circle.getNearestPoint(lRect));
+        }
+        case fig::SEGMENT: {
+            fig::Segment segment = std::get<fig::Segment>(figV);
+            fig::Point p1 = lRect.getNearestPoint(segment), p2 = segment.getNearestPoint(lRect);
+            return getDistance(p1, p2);
+        }
+        case fig::RECT: {
+            fig::Rect rRect = std::get<fig::Rect>(figV);
+            fig::Point p1 = lRect.getNearestPoint(rRect), p2 = rRect.getNearestPoint(lRect);
+            return getDistance(p1, p2);
+        }
+
+        case fig::POLYGON:
+
+        case fig::PATH:
+
+            break;
+    }
+
     return 0;  //TODO
 }
 
 
-/////////////////////////////////////////// LINE //////////////////////////////////////////////////
+/////////////////////////////////////////// LINE SEGMENT //////////////////////////////////////////
 
-void fig::Line::parseSvg(const std::string &svgStr) {
+void fig::Segment::parseSvg(const std::string &svgStr) {
 // Format example:
 // <line x1="0" y1="80" x2="100" y2="20" stroke="black" />
 //
@@ -293,19 +509,19 @@ void fig::Line::parseSvg(const std::string &svgStr) {
     two.y = getNumberFromRegex(y2R, svgStr);
 }
 
-void fig::Line::print() const {
+void fig::Segment::print() const {
     std::cout << "Line: p1 = " << getPoint1() << ", p2 = " << getPoint2();
 }
 
 
 // friend
 
-bool fig::doesOverlap(const fig::Line &left, figVariants rightVariant) {
+bool fig::doesOverlap(const fig::Segment &left, figVariants rightVariant) {
     switch (rightVariant.index()) {
         case fig::CIRCLE:
             return false;
-        case fig::LINE: {
-            auto *right = std::get_if<fig::Line>(&rightVariant);
+        case fig::SEGMENT: {
+            auto *right = std::get_if<fig::Segment>(&rightVariant);
             return left.pointBelongs(right->getPoint1()) && left.pointBelongs(right->getPoint2());
         }
         case fig::RECT: {
@@ -330,15 +546,104 @@ bool fig::doesOverlap(const fig::Line &left, figVariants rightVariant) {
                                         [left](fig::Point p) { return left.pointBelongs(p); }));
         }
     }
+    return false;
 }
 
 
-bool fig::operator==(const fig::Line &left, const fig::Line &right) {
+bool fig::operator==(const fig::Segment &left, const fig::Segment &right) {
     return (left.one == right.one) && (left.two == right.two);
 }
 
-double fig::getFiguresDistance(const fig::Line &line, const fig::figVariants &figV) {
+double fig::getFiguresDistance(const fig::Segment &seg, const fig::figVariants &figV) {
+    switch (figV.index()) {
+        case fig::CIRCLE: { //TODO test
+            fig::Circle circle = std::get<fig::Circle>(figV);
+            double d1 = getDistance(circle.getCenter(), seg.getPoint1())
+                        - circle.getRadius();
+            d1 = d1 < 0 ? 0 : d1;
+            double d2 = getDistance(circle.getCenter(), seg.getPoint2())
+                        - circle.getRadius();
+            d2 = d2 < 0 ? 0 : d2;
+            return d2 < d1 ? d2 : d1;
+        }
+        case fig::SEGMENT: {
+            fig::Segment rSeg = std::get<fig::Segment>(figV);
+
+            std::vector<double> d = {
+                    getDistance(seg.getPoint1(), rSeg.getPoint1()),
+                    getDistance(seg.getPoint1(), rSeg.getPoint2()),
+                    getDistance(seg.getPoint2(), rSeg.getPoint1()),
+                    getDistance(seg.getPoint2(), rSeg.getPoint2()),
+            };
+
+            return *std::min_element(d.begin(), d.end());
+
+        }
+        case fig::RECT: {
+            fig::Rect rect = std::get<fig::Rect>(figV);
+
+            return getFiguresDistance(rect, seg);
+
+        }
+        case fig::POLYGON: {
+
+        }
+        case fig::PATH: {
+
+        }
+    }
     return 0;  //TODO
+}
+
+fig::Point fig::Segment::getNearestPoint(const fig::figVariants &figV) const {
+    switch (figV.index()) {
+        case fig::CIRCLE: {
+            fig::Circle circle = std::get<fig::Circle>(figV);
+            if (getDistance(circle.getCenter(), getPoint1()) < getDistance(circle.getCenter(), getPoint2()))
+                return getPoint1();
+            return getPoint2();
+        }
+        case fig::SEGMENT: {
+            fig::Segment rSeg = std::get<fig::Segment>(figV);
+
+            std::vector<double> d = {
+                    getDistance(getPoint1(), rSeg.getPoint1()),
+                    getDistance(getPoint1(), rSeg.getPoint2()),
+                    getDistance(getPoint2(), rSeg.getPoint1()),
+                    getDistance(getPoint2(), rSeg.getPoint2()),
+            };
+            double minE = *std::min_element(d.begin(), d.end());
+            if (minE == d[0] || minE == d[1])
+                return getPoint1();
+            return getPoint2();
+        }
+        case fig::RECT: {
+            fig::Rect rect = std::get<fig::Rect>(figV);
+            fig::Point rectVerts[] = {
+                    rect.getPosition(),
+                    {rect.getPosition().x, rect.getPosition().y + rect.getHeight()},
+                    {rect.getPosition().x + rect.getWidth(), rect.getPosition().y},
+                    {rect.getPosition().x + rect.getWidth(), rect.getPosition().y + rect.getHeight()},
+            };
+            fig::Point segmentVerts[] = {
+                    getPoint1(),
+                    getPoint2()};
+
+            auto minDist = DBL_MAX;
+            fig::Point nearestPoint;
+            for (auto vS: segmentVerts) {
+                for (auto vR: rectVerts) {
+                    if (getDistance(vS, vR) < minDist) {
+                        minDist = getDistance(vS, vR);
+                        nearestPoint = vS;
+                    }
+                }
+            }
+
+            return nearestPoint;
+        }
+    }
+    return {};
 }
 
 
@@ -353,7 +658,8 @@ void fig::Polygon::parseSvg(const std::string &svgStr) {
     auto words_end = std::sregex_iterator();
     if (words_begin == words_end) throw std::runtime_error("svg format error");
 
-    int x, y, sepPos;
+    double x, y;
+    unsigned sepPos;
     std::string match_str;
     for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
         match = *i;
@@ -361,7 +667,7 @@ void fig::Polygon::parseSvg(const std::string &svgStr) {
         sepPos = match_str.find(',');
         x = std::stoi(std::string(match_str.cbegin(), match_str.cbegin() + sepPos));
         y = std::stoi(std::string(match_str.cbegin() + sepPos + 1, match_str.cend()));
-        m_points.push_back(fig::Point{x, y});
+        m_points.push_back({x, y});
     }
 }
 
@@ -380,7 +686,7 @@ bool fig::operator!=(const fig::Polygon &left, const fig::Polygon &right) {
 
 bool fig::operator==(const fig::Polygon &left, const fig::Polygon &right) {
     if (left.m_points.size() != right.m_points.size()) return false;
-    if (left.m_points.size() == 0) return true;
+    if (left.m_points.empty()) return true;
 
     auto leftIter = left.m_points.cbegin();
     auto rightIter = right.m_points.cbegin();
@@ -409,6 +715,10 @@ double fig::getFiguresDistance(const fig::Polygon &polygon, const fig::figVarian
     return 0; //TODO
 }
 
+fig::Point fig::Polygon::getNearestPoint(const fig::figVariants &fig) const {
+    return {}; //TODO
+}
+
 /////////////////////////////////////////// PATH //////////////////////////////////////////////////
 
 void fig::Path::parseSvg(const std::string &svgStr) {
@@ -420,7 +730,8 @@ void fig::Path::parseSvg(const std::string &svgStr) {
     auto words_end = std::sregex_iterator();
     if (words_begin == words_end) throw std::runtime_error("svg format error");
 
-    int x, y, sepPos;
+    double x, y;
+    unsigned sepPos;
     std::string match_str;
     Point firstP;
     bool isFirst = true;
@@ -430,9 +741,9 @@ void fig::Path::parseSvg(const std::string &svgStr) {
         sepPos = match_str.find(',');
         x = std::stoi(std::string(match_str.cbegin(), match_str.cbegin() + sepPos));
         y = std::stoi(std::string(match_str.cbegin() + sepPos + 1, match_str.cend()));
-        m_points.push_back(fig::Point{x, y});
+        m_points.push_back({x, y});
         if (isFirst) {
-            firstP = fig::Point{x, y};
+            firstP = {x, y};
             isFirst = false;
         }
     }
@@ -462,11 +773,11 @@ bool fig::doesOverlap(const fig::Path &left, const fig::figVariants &rightVarian
     switch (rightVariant.index()) {
         case fig::CIRCLE:
             return false;
-        case fig::LINE: {
-            auto *right = std::get_if<fig::Line>(&rightVariant);
+        case fig::SEGMENT: {
+            auto *right = std::get_if<fig::Segment>(&rightVariant);
 
             for (auto it = left.begin(); it != left.end() - 1; ++it) {
-                fig::Line seg{*it, *(it + 1)};
+                fig::Segment seg{*it, *(it + 1)};
                 if (doesOverlap(seg, *right))
                     return true;
             }
@@ -478,25 +789,30 @@ bool fig::doesOverlap(const fig::Path &left, const fig::figVariants &rightVarian
                     rectWidth = right->getWidth();
             fig::Point rectPos = right->getPosition();
             if (rectHeight == 0)
-                return doesOverlap(left, fig::Line(rectPos, {rectPos.x + rectWidth, rectPos.y}));
+                return doesOverlap(left, fig::Segment(rectPos, {rectPos.x + rectWidth, rectPos.y}));
             else if (rectWidth == 0)
-                return doesOverlap(left, fig::Line(rectPos, {rectPos.x, rectPos.y + rectHeight}));
+                return doesOverlap(left, fig::Segment(rectPos, {rectPos.x, rectPos.y + rectHeight}));
             else return false;
         }
-        case fig::PATH: {
-            auto *right = std::get_if<fig::Path>(&rightVariant);
-            // TODO: implement
-            throw std::runtime_error("not implemented");
-        }
-        case fig::POLYGON: {
-            auto *right = std::get_if<fig::Polygon>(&rightVariant);
-            // TODO: implement
-            throw std::runtime_error("not implemented");
-            // return true if the polygon is degenerate into a overlaped line
-        }
+//        case fig::PATH: {
+////            auto *right = std::get_if<fig::Path>(&rightVariant);
+//            // TODO: implement
+//            throw std::runtime_error("not implemented");
+//        }
+//        case fig::POLYGON: {
+////            auto *right = std::get_if<fig::Polygon>(&rightVariant);
+//            // TODO: implement
+//            throw std::runtime_error("not implemented");
+//            // return true if the polygon is degenerate into a overlaped line
+//        }
     }
+    return false;
 }
 
 double fig::getFiguresDistance(const fig::Path &path, const fig::figVariants &figV) {
     return 0;  //TODO
+}
+
+fig::Point fig::Path::getNearestPoint(const fig::figVariants &fig) const {
+    return {}; //TODO
 }

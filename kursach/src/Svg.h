@@ -32,6 +32,7 @@ public:
     unsigned getFiguresCount() { return m_figures.size(); }
 
     int getHeight() { return m_height; }
+
     int getWidth() { return m_width; }
 
     void empty();
@@ -40,6 +41,8 @@ public:
     auto begin() { return std::begin(m_figures); }
 
     auto end() { return std::end(m_figures); }
+
+    fig::figVariants get(unsigned n) { return m_figures[n]; }
 
 
     void erase(std::vector<fig::figVariants>::iterator iter);

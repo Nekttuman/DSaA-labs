@@ -4,7 +4,7 @@
 
 #include "AlgorithmTests.h"
 
-void AlgorithmTests::testCircleOverlapsCircle() {
+void AlgorithmTests::сircleOverlapsCircleTest() {
     parseSvg(prefixPath + "Circles/CircleOverlap1.svg");
     if (svg.getFiguresCount() != 2)
         throw std::runtime_error("CircleOverlap1.svg parse error");
@@ -34,12 +34,12 @@ void AlgorithmTests::testCircleOverlapsCircle() {
 }
 
 
-void AlgorithmTests::testCircleOverlapsLine() {
+void AlgorithmTests::circleOverlapsLineTest() {
     parseSvg(prefixPath + "Circles/CircleOverlapLine.svg");
     if (svg.getFiguresCount() != 2)
         throw std::runtime_error("CircleOverlapLine.svg parse error");
     fig::Circle circle = std::get<fig::Circle>(*svg.begin());
-    fig::Line line = std::get<fig::Line>(*(svg.begin() + 1));
+    fig::Segment line = std::get<fig::Segment>(*(svg.begin() + 1));
     assert(doesOverlap(circle, line) &&
            "Circle overlaps line. test file: CircleOverlapLine.svg");
     std::cout << "Circle overlaps line: PASSED\n";
@@ -48,7 +48,7 @@ void AlgorithmTests::testCircleOverlapsLine() {
     if (svg.getFiguresCount() != 2)
         throw std::runtime_error("CircleIntersectLine.svg parse error");
     circle = std::get<fig::Circle>(*svg.begin());
-    line = std::get<fig::Line>(*(svg.begin() + 1));
+    line = std::get<fig::Segment>(*(svg.begin() + 1));
     assert(!doesOverlap(circle, line) &&
            "Circle intersect line. test for overlap return false. test file: CircleIntersectLine.svg");
     std::cout << "Circle intersect line: PASSED\n";
@@ -57,13 +57,13 @@ void AlgorithmTests::testCircleOverlapsLine() {
     if (svg.getFiguresCount() != 2)
         throw std::runtime_error("CircleNotIntersectLine.svg parse error");
     circle = std::get<fig::Circle>(*svg.begin());
-    line = std::get<fig::Line>(*(svg.begin() + 1));
+    line = std::get<fig::Segment>(*(svg.begin() + 1));
     assert(!doesOverlap(circle, line) &&
            "Circle not intersect line. test for overlap return false. test file: CircleNotIntersectLine.svg");
     std::cout << "Circle not intersect line: PASSED\n";
 }
 
-void AlgorithmTests::testCircleOverlapsRect() {
+void AlgorithmTests::circleOverlapsRectTest() {
     parseSvg(prefixPath + "Circles/CircleOverlapRect.svg");
     if (svg.getFiguresCount() != 2)
         throw std::runtime_error("CircleOverlapRect.svg parse error");
@@ -111,7 +111,7 @@ void AlgorithmTests::testCircleOverlapsRect() {
     std::cout << "Circle don't overlaps rect 4/4: PASSED\n";
 }
 
-void AlgorithmTests::testCircleOverlapsPath(){
+void AlgorithmTests::circleOverlapsPathTest(){
     parseSvg(prefixPath + "Circles/CircleOverlapsPath.svg");
     if (svg.getFiguresCount() != 2)
         throw std::runtime_error("CircleOverlapsPath.svg parse error");
@@ -141,7 +141,7 @@ void AlgorithmTests::testCircleOverlapsPath(){
 }
 
 
-void AlgorithmTests::testCircleOverlapsPolygon(){
+void AlgorithmTests::circleOverlapsPolygonTest(){
     parseSvg(prefixPath + "Circles/CircleOverlapsPolygon.svg");
     if (svg.getFiguresCount() != 2)
         throw std::runtime_error("CircleOverlapsPolygon.svg parse error");
@@ -175,7 +175,7 @@ void AlgorithmTests::testCircleOverlapsPolygon(){
 /////////////////////////// RECT///////////////////////////////
 
 
-void AlgorithmTests::testRectOverlapsCircle() {
+void AlgorithmTests::rectOverlapsCircleTest() {
     parseSvg(prefixPath + "Rects/RectOverlapsCircle.svg");
     if (svg.getFiguresCount() != 2)
         throw std::runtime_error("Rects/RectOverlapsCircle.svg parse error");
@@ -209,7 +209,7 @@ void AlgorithmTests::testRectOverlapsLine() {
     parseSvg(prefixPath + "Rects/RectOverlapsLine.svg");
     if (svg.getFiguresCount() != 2)
         throw std::runtime_error("Rects/RectOverlapsLine.svg parse error");
-    fig::Line line = std::get<fig::Line>(*svg.begin());
+    fig::Segment line = std::get<fig::Segment>(*svg.begin());
     fig::Rect rect = std::get<fig::Rect>(*(svg.begin() + 1));
     assert(doesOverlap(rect, line) &&
            "Rect overlaps circle. test file: RectOverlapsLine.svg");
@@ -218,7 +218,7 @@ void AlgorithmTests::testRectOverlapsLine() {
     parseSvg(prefixPath + "Rects/RectIntersectsLine.svg");
     if (svg.getFiguresCount() != 2)
         throw std::runtime_error("Rects/RectIntersectsLine.svg parse error");
-    line = std::get<fig::Line>(*svg.begin());
+    line = std::get<fig::Segment>(*svg.begin());
     rect = std::get<fig::Rect>(*(svg.begin() + 1));
     assert(!doesOverlap(rect, line) &&
            "Rect dont overlaps line. test file: RectIntersectsLine.svg");
@@ -227,7 +227,7 @@ void AlgorithmTests::testRectOverlapsLine() {
     parseSvg(prefixPath + "Rects/RectDontIntersectLine.svg");
     if (svg.getFiguresCount() != 2)
         throw std::runtime_error("Rects/RectDontIntersectsLine.svg parse error");
-    line = std::get<fig::Line>(*svg.begin());
+    line = std::get<fig::Segment>(*svg.begin());
     rect = std::get<fig::Rect>(*(svg.begin() + 1));
     assert(!doesOverlap(rect, line) &&
            "Rect dont overlaps line. test file: RectDontIntersectsLine.svg");
@@ -320,5 +320,15 @@ void AlgorithmTests::testRectOverlapsPolygon(){ //TODO
     assert(!doesOverlap(lRect, polygon) &&
            "Rect dont overlaps polygon. test file: RectDontIntersectsPolygon.svg");
     std::cout << "Rect dont overlaps polygon (2/2): PASSED\n";
+
+}
+
+void AlgorithmTests::setFiguresDrawingOrderTest() {
+    parseSvg("../test.svg");
+    setFiguresDrawingOrder();
+//    std::cout<<svg;
+//
+//    for (auto i: figuresDrawingOrder)
+//        std::cout<<i<<" ";
 
 }

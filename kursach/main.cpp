@@ -6,19 +6,11 @@
 
 int main() {
     Algorithm alg;
-//    alg.parseSvg("../test.svg");
-//    alg.drawParsed();
-//    alg.logSvg();
-//    alg.setGcodeFilePath("../test.gcode");
-//
-//    alg.mergeIntersectFigures();
-//    alg.logSvg();
-//
-//    alg.sliceFigures();
-//    alg.generateGcode();
+    alg.start("../test.svg", "../test.gcode", 1);
 
-FigTests fTest;
-fTest.startFigTests();
+
+//FigTests fTest;
+//fTest.startFigTests();
 
 //    SvgParseTest spTest;
 //    spTest.startTests();

@@ -13,41 +13,41 @@
 class AlgorithmTests : public Algorithm {
     const std::string prefixPath = "../test/testSvg/";
 
-    void testCircleOverlapsCircle();
-    void testCircleOverlapsLine();
-    void testCircleOverlapsRect();
-    void testCircleOverlapsPath();
-    void testCircleOverlapsPolygon();
+    void сircleOverlapsCircleTest();
+    void circleOverlapsLineTest();
+    void circleOverlapsRectTest();
+    void circleOverlapsPathTest();
+    void circleOverlapsPolygonTest();
 
-    void testRectOverlapsCircle();
+    void rectOverlapsCircleTest();
     void testRectOverlapsLine();
     void testRectOverlapsRect();
     void testRectOverlapsPath();
     void testRectOverlapsPolygon();
 
+    void setFiguresDrawingOrderTest();
+
 public:
 
     void startTests() {
         std::cout << "\nALGORITHMS TESTS STARTED\n\n--- Circle overlaps circle test ---\n";
-        testCircleOverlapsCircle();
+        сircleOverlapsCircleTest();
 
         std::cout << "\n\n--- Circle overlaps line test ---\n";
-        testCircleOverlapsLine();
+        circleOverlapsLineTest();
 
         std::cout << "\n\n--- Circle overlaps rect test ---\n";
-        testCircleOverlapsRect();
+        circleOverlapsRectTest();
 
         std::cout << "\n\n--- Circle overlaps path test ---\n";
-        testCircleOverlapsPath();
+        circleOverlapsPathTest();
 
         std::cout << "\n\n--- Circle overlaps polygon test ---\n";
-        testCircleOverlapsPolygon();
-
-        std::cout << "\nTESTS PASSED\n";
+        circleOverlapsPolygonTest();
 
 
         std::cout << "\n\n--- Rect overlaps circle test ---\n";
-        testRectOverlapsCircle();
+        rectOverlapsCircleTest();
 
         std::cout << "\n\n--- Rect overlaps line test ---\n";
         testRectOverlapsLine();
@@ -60,6 +60,11 @@ public:
 
         std::cout << "\n\n--- Rect overlaps polygon test ---\n";
         testRectOverlapsPolygon();
+
+
+
+        std::cout << "\n\n--- setFiguresDrawingOrder test ---\n";
+        setFiguresDrawingOrderTest();
 
         std::cout << "\nTESTS PASSED\n";
     }

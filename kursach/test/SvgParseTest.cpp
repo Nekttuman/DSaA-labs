@@ -78,8 +78,8 @@ void SvgParseTest::nonefillPolylineParseTest() {
 
 void SvgParseTest::lineParseTest() {
     parse(prefixPath + "Line.svg");
-    fig::Line poly = std::get<fig::Line>(m_figures[0]);
-    assert(poly == fig::Line(0, 80, 100, 20) &&
+    fig::Segment poly = std::get<fig::Segment>(m_figures[0]);
+    assert(poly == fig::Segment(0, 80, 100, 20) &&
            "line parse. test file: Line.svg");
     std::cout << "line parse: PASSED\n";
     empty();
