@@ -48,13 +48,13 @@ public:
     void moveTo(fig::Point p) {
         raiseBrush();
         file << "; move to point (" << p.x << ":" << p.y << ")\n"
-             << "G1 X" << maxXPos - (p.x) << " Y" << maxYPos - p.y << " F3000\n";
+             << "G1 X" << maxXPos - (p.x* 165/800) << " Y" << maxYPos - p.y*165/600 << " F3000\n";
         lowerBrush();
 
     }
 
     void drawTo(fig::Point p) {
-        file << "G1 X" <<maxXPos - (p.x) << " Y" << maxYPos - p.y << " F3000; draw\n";
+        file << "G1 X" <<maxXPos - (p.x* 165/800) << " Y" << maxYPos - p.y*165/600 << " F3000; draw\n";
     }
 
     void sliceFig(const fig::slicedFig &fig) {
