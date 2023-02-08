@@ -30,7 +30,13 @@ class AVLTree {
         Node *T2 = x->right;
         x->right = y;
         y->left = T2;
-        y->h = std::max(y->left->h, y->right->h) + 1;
+        if (y->left == nullptr)
+            y->h = y->right->h +1;
+        else
+            y->h = std::max(y->left->h, y->right->h) + 1;
+        if (x->left == nullptr)
+            x->h = x->right->h +1;
+        else
         x->h = std::max(x->left->h, x->right->h) + 1;
         return x;
     }
@@ -40,8 +46,14 @@ class AVLTree {
         Node *T2 = y->left;
         y->left = x;
         x->right = T2;
+        if (x->right == nullptr)
+            x->h = x->left->h+1;
+        else
         x->h = std::max(x->left->h, x->right->h) + 1;
-        y->h = std::max(y->left->h, y->right->h) + 1;
+        if (y->right == nullptr)
+            y->h = y->left->h+1;
+        else
+            y->h = std::max(y->left->h, y->right->h) + 1;
         return y;
     }
 
