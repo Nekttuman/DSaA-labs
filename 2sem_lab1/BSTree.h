@@ -255,6 +255,11 @@ public:
         deleteTree(root);
     }
 
+    long long getHeight(){
+
+        return 0;
+    }
+
 private:
     Node *findSuccessorNode(Node *n, Node *succ, int key) {
         if (n == nullptr)

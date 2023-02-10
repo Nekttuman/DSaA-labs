@@ -147,6 +147,9 @@ public:
         }
     }
 
+    long long getHeight(){
+        return root->h;
+    }
 };
 
 

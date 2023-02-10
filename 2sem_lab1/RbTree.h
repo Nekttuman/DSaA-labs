@@ -133,6 +133,7 @@ public:
     int getHeight(){
         int h = 0;
 
+        return 0;
     }
 
     void insert(T key) {

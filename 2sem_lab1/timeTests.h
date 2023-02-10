@@ -15,13 +15,13 @@
 
 #include <chrono>
 
-std::vector<long long> bstTest() {
+std::pair<std::vector<long long>, std::vector<long long>> bstTest() {
     std::fstream in("../test_data/10.txt", std::ios_base::in);
 
     if (!in.is_open())
         throw;
 
-    std::vector<long long> bstTimes;
+    std::vector<long long> bstTimes, bstHeights;
     BinarySearchTree<int> bsTree(1);
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -33,6 +33,7 @@ std::vector<long long> bstTest() {
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     bstTimes.push_back(duration.count());
+    bstHeights.push_back(bsTree.getHeight());
 
     in.close();
     in.open("../test_data/100.txt", std::ios_base::in);
@@ -49,6 +50,7 @@ std::vector<long long> bstTest() {
     stop = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     bstTimes.push_back(duration.count());
+    bstHeights.push_back(bsTree1.getHeight());
 
     in.close();
     in.open("../test_data/1000.txt");
@@ -65,6 +67,7 @@ std::vector<long long> bstTest() {
     stop = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     bstTimes.push_back(duration.count());
+    bstHeights.push_back(bsTree2.getHeight());
 
     in.close();
     in.open("../test_data/3000.txt");
@@ -77,11 +80,12 @@ std::vector<long long> bstTest() {
     while (in >> data) {
         bsTree3.insert(data);
     }
-
     in.close();
     stop = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     bstTimes.push_back(duration.count());
+
+    bstHeights.push_back(bsTree3.getHeight());
 
     in.close();
     in.open("../test_data/5000.txt");
@@ -98,6 +102,8 @@ std::vector<long long> bstTest() {
     stop = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     bstTimes.push_back(duration.count());
+
+    bstHeights.push_back(bsTree4.getHeight());
 
 
     in.close();
@@ -116,6 +122,8 @@ std::vector<long long> bstTest() {
     duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     bstTimes.push_back(duration.count());
 
+    bstHeights.push_back(bsTree5.getHeight());
+
 
     in.close();
     in.open("../test_data/100000.txt");
@@ -133,17 +141,38 @@ std::vector<long long> bstTest() {
     duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     bstTimes.push_back(duration.count());
 
-    return bstTimes;
+    bstHeights.push_back(bsTree6.getHeight());
+
+
+    in.close();
+    in.open("../test_data/60000.txt");
+    if (!in.is_open())
+        throw;
+
+    BinarySearchTree<int> bsTree7(1);
+
+    start = std::chrono::high_resolution_clock::now();
+    while (in >> data) {
+        bsTree7.insert(data);
+    }
+
+    stop = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+    bstTimes.push_back(duration.count());
+
+    bstHeights.push_back(bsTree7.getHeight());
+
+    return {bstTimes, bstHeights};
 }
 
 
-std::vector<long long> rbTest() {
+std::pair<std::vector<long long>,std::vector<long long>> rbTest() {
     std::fstream in("../test_data/10.txt", std::ios_base::in);
 
     if (!in.is_open())
         throw;
 
-    std::vector<long long> rbTimes;
+    std::vector<long long> rbTimes, rbHeights;
     RBTree<int> rbTree;
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -155,7 +184,7 @@ std::vector<long long> rbTest() {
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     rbTimes.push_back(duration.count());
-
+    rbHeights.push_back(rbTree.getHeight());
     in.close();
     in.open("../test_data/100.txt");
     if (!in.is_open())
@@ -171,6 +200,7 @@ std::vector<long long> rbTest() {
     stop = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     rbTimes.push_back(duration.count());
+    rbHeights.push_back(rbTree1.getHeight());
 
     in.close();
     in.open("../test_data/1000.txt");
@@ -188,6 +218,8 @@ std::vector<long long> rbTest() {
     duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     rbTimes.push_back(duration.count());
 
+    rbHeights.push_back(rbTree2.getHeight());
+
     in.close();
     in.open("../test_data/3000.txt");
     if (!in.is_open())
@@ -203,6 +235,7 @@ std::vector<long long> rbTest() {
     stop = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     rbTimes.push_back(duration.count());
+    rbHeights.push_back(rbTree3.getHeight());
 
     in.close();
     in.open("../test_data/5000.txt");
@@ -219,6 +252,7 @@ std::vector<long long> rbTest() {
     stop = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     rbTimes.push_back(duration.count());
+    rbHeights.push_back(rbTree4.getHeight());
 
 
     in.close();
@@ -237,6 +271,7 @@ std::vector<long long> rbTest() {
     duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     rbTimes.push_back(duration.count());
 
+    rbHeights.push_back(rbTree5.getHeight());
 
     in.close();
     in.open("../test_data/100000.txt");
@@ -254,17 +289,37 @@ std::vector<long long> rbTest() {
     duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     rbTimes.push_back(duration.count());
 
-    return rbTimes;
+    rbHeights.push_back(rbTree6.getHeight());
+
+    in.close();
+    in.open("../test_data/60000.txt");
+    if (!in.is_open())
+        throw;
+
+    RBTree<int> rbTree7;
+
+    start = std::chrono::high_resolution_clock::now();
+    while (in >> data) {
+        rbTree7.insert(data);
+    }
+
+    stop = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+    rbTimes.push_back(duration.count());
+
+    rbHeights.push_back(rbTree7.getHeight());
+    return {rbTimes, rbHeights};
 }
 
 
-std::vector<long long> avlTest() {
+
+std::pair<std::vector<long long>,std::vector<long long>> avlTest() {
     std::fstream in("../test_data/10.txt", std::ios_base::in);
 
     if (!in.is_open())
         throw;
 
-    std::vector<long long> avlTimes;
+    std::vector<long long> avlTimes, avlHeights;
     AVLTree<int> avlTree(1);
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -376,8 +431,32 @@ std::vector<long long> avlTest() {
     avlTimes.push_back(duration.count());
 
 
+    in.close();
+    in.open("../test_data/60000.txt");
+    if (!in.is_open())
+        throw;
 
-    return avlTimes;
+    AVLTree<int> avlTree7(1);
+
+    start = std::chrono::high_resolution_clock::now();
+    while (in >> data) {
+        avlTree7.insert(data);
+    }
+
+    stop = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+    avlTimes.push_back(duration.count());
+
+    avlHeights.push_back(avlTree.getHeight());
+    avlHeights.push_back(avlTree1.getHeight());
+    avlHeights.push_back(avlTree2.getHeight());
+    avlHeights.push_back(avlTree3.getHeight());
+    avlHeights.push_back(avlTree4.getHeight());
+    avlHeights.push_back(avlTree5.getHeight());
+    avlHeights.push_back(avlTree6.getHeight());
+    avlHeights.push_back(avlTree7.getHeight());
+
+    return {avlTimes, avlHeights};
 }
 
 
