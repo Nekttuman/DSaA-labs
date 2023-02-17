@@ -85,6 +85,15 @@ class RBTree {
         }
     }
 
+    void getLevelCount(Node *n, int count, int &max_count) const {
+        if (n == nullptr)
+            max_count = (max_count > count) ? max_count : count;
+        else {
+            count++;
+            getLevelCount(n->left, count, max_count);
+            getLevelCount(n->right, count, max_count);
+        }
+    }
 public:
     RBTree() {
         TNULL = new Node;
@@ -92,6 +101,12 @@ public:
         TNULL->left = nullptr;
         TNULL->right = nullptr;
         root = TNULL;
+    }
+
+    int getHeight() const {
+        int ans = INT_MIN;
+        getLevelCount(root, 0, ans);
+        return ans;
     }
 
     void lRotate(Node *x) {
@@ -128,12 +143,6 @@ public:
         }
         y->right = x;
         x->parent = y;
-    }
-
-    int getHeight(){
-        int h = 0;
-
-        return 0;
     }
 
     void insert(T key) {

@@ -140,7 +140,7 @@ public:
     }
 
     void bfsPrint() {
-        int levelsCount = this->levels();
+        int levelsCount = this->getHeight();
         for (int i = 1; i <= levelsCount; ++i) {
             printLevel(root, i);
             std::cout << "\n";
@@ -214,7 +214,7 @@ public:
         std::cout << "\n";
     }
 
-    int levels() const {
+    int getHeight() const {
         int ans = INT_MIN;
         getLevelCount(root, 0, ans);
         return ans;
@@ -223,7 +223,7 @@ public:
     void beautyPrint() {
         int maxWidth = getMaxElemWidth();
         maxWidth = maxWidth % 2 ? maxWidth : maxWidth + 1;
-        for (int h = this->levels(), ws = 1; h > 0; --h) {
+        for (int h = this->getHeight(), ws = 1; h > 0; --h) {
 
             auto lev = this->getLevel(h);
             std::cout << std::string(ws / 2, ' ');
@@ -255,10 +255,6 @@ public:
         deleteTree(root);
     }
 
-    long long getHeight(){
-
-        return 0;
-    }
 
 private:
     Node *findSuccessorNode(Node *n, Node *succ, int key) {
@@ -381,7 +377,7 @@ private:
     int getMaxElemWidth() {
         int maxWidth = 0;
 
-        for (int h = this->levels(); h > 0; --h) {
+        for (int h = this->getHeight(); h > 0; --h) {
             auto lev = this->getLevel(h);
             for (const auto &item: lev)
                 if (item.size() > maxWidth)

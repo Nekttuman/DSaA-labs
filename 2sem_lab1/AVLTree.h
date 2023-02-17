@@ -114,6 +114,16 @@ class AVLTree {
         return node;
     }
 
+    void getLevelCount(Node *n, int count, int &max_count) const {
+        if (n == nullptr)
+            max_count = (max_count > count) ? max_count : count;
+        else {
+            count++;
+            getLevelCount(n->left, count, max_count);
+            getLevelCount(n->right, count, max_count);
+        }
+    }
+
 public:
     Node *root;
 
@@ -147,8 +157,10 @@ public:
         }
     }
 
-    long long getHeight(){
-        return root->h;
+    int getHeight() const {
+        int ans = INT_MIN;
+        getLevelCount(root, 0, ans);
+        return ans;
     }
 };
 
