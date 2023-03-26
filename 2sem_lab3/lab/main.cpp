@@ -24,17 +24,37 @@ int main() {
 
     std::string path = ans ? "../enwik8.txt" : "../tmpres.txt";
 
+
     std::fstream enwik(path, std::ios_base::in);
+    if (!enwik.is_open()){
+        std::cout<<"file not opened";
+        throw;
+    }
+
+    //////////////////////////
+
+    float dataset_size_koef = 0.1;
+
+
+    //////////////////////////
+
+
+
+
     if (enwik.is_open())
         std::cout << "File opened\n";
     enwik.seekg(0, std::ios::end);
-    size_t size = enwik.tellg() * (ans? 0.01:1);
+    size_t size = enwik.tellg() * (ans ? dataset_size_koef : 1);
     std::string buffer(size, ' ');
     enwik.seekg(0);
     enwik.read(&buffer[0], size);
 
 
     std::fstream tmpResFile("../tmpres.txt", std::ios_base::out);
+    if (!tmpResFile.is_open()){
+        std::cout<<"file not opened";
+        throw;
+    }
     std::string tmpRes;
 
     switch (num) {

@@ -43,6 +43,7 @@ namespace Algo {
 
     string BWT_Compress(const string &input) {
         vector<string> rotations;
+        rotations.reserve(input.length());
         string bwt;
 
         for (size_t i = 0; i < input.length(); ++i) {
