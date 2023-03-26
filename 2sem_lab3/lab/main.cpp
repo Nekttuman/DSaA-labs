@@ -9,12 +9,12 @@ int main() {
 
 
     std::cout << """1. HA\n"
-                 "2. AC\n"
+                 "2. RLE\n"
                  "3. LZ78\n"
                  "4. BWT\n"
                  "5. MTF\n"
                  "6. AC\n"
-                 "7. PPM0\n"
+                 "7. PPM\n"
                  "\ncode: """;
     int num;
     std::cin >> num;
@@ -31,18 +31,13 @@ int main() {
         throw;
     }
 
-    //////////////////////////
+    ////////////////////////////
 
-    float dataset_size_koef = 0.1;
+    float dataset_size_koef = 1;
 
-
-    //////////////////////////
-
+    ////////////////////////////
 
 
-
-    if (enwik.is_open())
-        std::cout << "File opened\n";
     enwik.seekg(0, std::ios::end);
     size_t size = enwik.tellg() * (ans ? dataset_size_koef : 1);
     std::string buffer(size, ' ');
@@ -57,9 +52,9 @@ int main() {
     }
     std::string tmpRes;
 
+    auto start = std::chrono::high_resolution_clock::now();
     switch (num) {
         case 1: {
-            auto start = std::chrono::high_resolution_clock::now();
             tmpRes = Algo::HA_Compress(buffer);
 
             auto stop = std::chrono::high_resolution_clock::now();
@@ -68,17 +63,15 @@ int main() {
             break;
         }
         case 2: {
-            auto start = std::chrono::high_resolution_clock::now();
 
-            tmpRes = Algo::AC_Compress(buffer);
+            tmpRes = Algo::RLE_Compress(buffer);
 
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-            std::cout << "2. AC time: " << duration.count() << "\n";
+            std::cout << "2. RLE time: " << duration.count() << "\n";
             break;
         }
         case 3: {
-            auto start = std::chrono::high_resolution_clock::now();
 
             tmpRes = Algo::LZ78_Compress(buffer);
 
@@ -88,7 +81,6 @@ int main() {
             break;
         }
         case 4: {
-            auto start = std::chrono::high_resolution_clock::now();
 
             tmpRes = Algo::BWT_Compress(buffer);
 
@@ -100,8 +92,6 @@ int main() {
         }
         case 5: {
 
-            auto start = std::chrono::high_resolution_clock::now();
-
             tmpRes = Algo::MTF_Compress(buffer);
 
             auto stop = std::chrono::high_resolution_clock::now();
@@ -111,7 +101,6 @@ int main() {
             break;
         }
         case 6: {
-            auto start = std::chrono::high_resolution_clock::now();
 
             tmpRes = Algo::AC_Compress(buffer);
 
@@ -121,7 +110,6 @@ int main() {
             break;
         }
         case 7: {
-            auto start = std::chrono::high_resolution_clock::now();
 
             tmpRes = Algo::ppm_encode(buffer);
 

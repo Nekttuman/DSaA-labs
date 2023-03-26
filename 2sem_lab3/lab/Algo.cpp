@@ -21,7 +21,6 @@ namespace Algo {
         string result;
         string current;
 
-//        int i = 0;
         for (char c: input) {
             string next = current + c;
             if (dictionary.find(next) != dictionary.end()) {
@@ -31,7 +30,6 @@ namespace Algo {
                 dictionary[next] = dictionary.size();
                 current = "";
             }
-//            std::cout<<i++<<" ";
         }
 
         if (!current.empty()) {
