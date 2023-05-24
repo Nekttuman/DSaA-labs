@@ -3,7 +3,7 @@ project(coursework2)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(coursework2 main.cpp Button.h Field.h Button.cpp Field.cpp Cfg.cpp Cfg.h)
+add_executable(coursework2 main.cpp Button.h Field.h Button.cpp Field.cpp Cfg.cpp Cfg.h UI.cpp UI.h SudokuSolver.cpp SudokuSolver.h)
 
 set(SFML_STATIC_LIBRARIES TRUE)
 set(SFML_DIR F:/Libs/SFML-2.5.1/lib/cmake/SFML)

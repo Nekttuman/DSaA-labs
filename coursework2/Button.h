@@ -1,7 +1,3 @@
-//
-// Created by nektt on 5/21/2023.
-//
-
 #ifndef COURSEWORK2_BUTTON_H
 #define COURSEWORK2_BUTTON_H
 

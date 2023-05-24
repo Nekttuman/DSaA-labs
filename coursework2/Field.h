@@ -1,6 +1,3 @@
-//
-// Created by nektt on 5/21/2023.
-//
 #include <SFML/Graphics.hpp>
 
 #ifndef COURSEWORK2_FIELD_H
@@ -41,17 +38,7 @@ public:
 
     std::vector<std::vector<short>> getField() const;
 
-    void setField(std::vector<std::vector<short>> field){
-        resetValues();
-        _cellsValues = field;
-        for (int row = 0; row < 9; row++)
-            for (int col = 0; col < 9; col++){
-                if (_cellsValues[row][col] == 0)
-                    _cells[row][col].setText(" ");
-                else
-                _cells[row][col].setText(std::to_string(_cellsValues[col][row]));
-            }
-    }
+    void setField(std::vector<std::vector<short>> field);
 
     void detectCollisions(sf::Vector2i mousePos, bool isPressed);
 

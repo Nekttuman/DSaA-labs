@@ -1,6 +1,3 @@
-//
-// Created by nektt on 5/21/2023.
-//
 #include "Button.h"
 
 Button::Button(sf::Vector2f size, sf::Vector2f pos, const std::string &text) {
