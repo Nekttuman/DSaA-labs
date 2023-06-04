@@ -52,10 +52,10 @@ Field::Field() {
 
     _font.loadFromFile(Cfg::FontPath);
 
-    for (int i = 0; i < 9; ++i) {
+    for (int i = 0; i < _sudokuSize; ++i) {
         _cells.emplace_back();
         _cellsValues.emplace_back();
-        for (int j = 0; j < 9; ++j) {
+        for (int j = 0; j < _sudokuSize; ++j) {
             _cells[i].push_back(Button(sf::Vector2f(Cfg::CellSizePx, Cfg::CellSizePx), _fieldGap + sf::Vector2f(
                     Cfg::CellSizePx * (i), Cfg::CellSizePx * (j)), "0"));
             _cells[i][j].setTextSizePx(18);
@@ -80,8 +80,8 @@ Field::Field() {
     };
     _clearCellsColors();
 
-    for (int row = 0; row < 9; row++)
-        for (int col = 0; col < 9; col++){
+    for (int row = 0; row < _sudokuSize; row++)
+        for (int col = 0; col < _sudokuSize; col++){
             if (_cellsValues[col][row] == 0)
                 _cells[row][col].setText(" ");
             else
@@ -96,21 +96,21 @@ std::vector<std::vector<short>> Field::getField() const {
 }
 
 void Field::setField(std::vector<std::vector<short>> field){
-    resetValues();
+//    resetValues();
     _cellsValues = field;
-    for (int row = 0; row < 9; row++)
-        for (int col = 0; col < 9; col++){
-            if (_cellsValues[row][col] == 0)
-                _cells[row][col].setText(" ");
-            else
-                _cells[row][col].setText(std::to_string(_cellsValues[col][row]));
-        }
+//    for (int row = 0; row < _sudokuSize; row++)
+//        for (int col = 0; col < _sudokuSize; col++){
+//            if (_cellsValues[row][col] == 0)
+//                _cells[row][col].setText(" ");
+//            else
+//                _cells[row][col].setText(std::to_string(_cellsValues[col][row]));
+//        }
 }
 
 
 void Field::detectCollisions(sf::Vector2i mousePos, bool isPressed) {
-    for (int i = 0; i < 9; ++i)
-        for (int j = 0; j < 9; ++j) {
+    for (int i = 0; i < _sudokuSize; ++i)
+        for (int j = 0; j < _sudokuSize; ++j) {
             _cells[i][j].changeColorOnMousePosition(mousePos, isPressed);
             if (_cells[i][j].isPressed() && &_cells[i][j] != _selectedCell) {
                 _selectedCell = &_cells[i][j];
@@ -148,7 +148,7 @@ void Field::getNumber() {
         _cellsValues[_selectedCellPos.y][_selectedCellPos.x] = num;
         _selectedCell->setText(std::to_string(num)=="0"?" ":std::to_string(num));
 
-        _validateField();
+        validateField();
         if (!_isFieldValid) {
             _selectedCell->setColors(sf::Color::Red, sf::Color(151, 176, 176), sf::Color::Red,
                                      sf::Color::Black);
@@ -178,8 +178,8 @@ void Field::draw(sf::RenderTarget &target, sf::RenderStates states) const {
 }
 
 void Field::resetValues() {
-    for (int i = 0; i < 9; ++i)
-        for (int j = 0; j < 9; ++j) {
+    for (int i = 0; i < _sudokuSize; ++i)
+        for (int j = 0; j < _sudokuSize; ++j) {
             _cellsValues[i][j] = 0;
             _cells[i][j].setText(" ");
             _cells[i][j].setColors(sf::Color::White, sf::Color(151, 176, 176), sf::Color(167, 235, 235),
@@ -201,13 +201,13 @@ void Field::_clearCellsColors() {
     }
 }
 
-void Field::_validateField() {
+bool Field::validateField() {
     // rows
     for (auto line: _cellsValues) {
         for (auto item = line.begin(); item != line.end(); item++) {
             if (std::find(item + 1, line.end(), *item) != line.end() && *item != 0) {
                 _isFieldValid = false;
-                return;
+                return false;
             } else {
                 _isFieldValid = true;
             }
@@ -219,7 +219,7 @@ void Field::_validateField() {
         for (int j = 0; j < 9; ++j) {
             if (alreadyInCol[_cellsValues[j][i]] && _cellsValues[j][i] != 0) {
                 _isFieldValid = false;
-                return;
+                return false;
             } else {
                 alreadyInCol[_cellsValues[j][i]] = true;
                 _isFieldValid = true;
@@ -233,7 +233,7 @@ void Field::_validateField() {
             for (int j = (squadN % 3) * 3; j < (squadN % 3) * 3 + 3; ++j) {
                 if (alreadyInCol[_cellsValues[j][i]] && _cellsValues[j][i] != 0) {
                     _isFieldValid = false;
-                    return;
+                    return false;
                 } else {
                     alreadyInCol[_cellsValues[j][i]] = true;
                     _isFieldValid = true;
@@ -241,4 +241,5 @@ void Field::_validateField() {
             }
         }
     }
+    return true;
 }

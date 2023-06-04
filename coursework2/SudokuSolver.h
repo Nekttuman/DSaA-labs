@@ -9,15 +9,17 @@
 #include <vector>
 #include <list>
 #include "Cfg.h"
+#include <iostream>
 
-const int N = 81;
+
 
 class GraphSudokuSolver {
     std::list<int> *adj;
-
+    int N = 81;
     int result[81];
 public:
-    GraphSudokuSolver() {
+    GraphSudokuSolver(int n = 9) {
+        N = n*n;
         adj = new std::list<int>[N];
     }
 
@@ -30,7 +32,7 @@ public:
 
     void sudokuGrid2Graph(const std::vector<std::vector<short>> &grid) {
 
-        for (int vertNum = 0; vertNum < 81; ++vertNum) {
+        for (int vertNum = 0; vertNum < N; ++vertNum) {
             int vLine = vertNum / 9, vCol = vertNum % 9;
             for (int cur = 0; cur < 9; ++cur) {
                 if (vertNum + cur - vCol != vertNum)
@@ -110,9 +112,11 @@ public:
 };
 
 class SudokuSolver {
+    int boxSizeW;
+    int boxSizeH;
 
     std::vector<std::vector<short>> _grid;
-    const static int N = 9;
+    int N = 9;
 
 
     bool _isPresentInCol(int col, int num) {
@@ -133,8 +137,8 @@ class SudokuSolver {
 
     bool _isPresentInBox(int boxStartRow, int boxStartCol, int num) {
         //check whether num is present in 3x3 box or not
-        for (int row = 0; row < 3; row++)
-            for (int col = 0; col < 3; col++)
+        for (int row = 0; row < boxSizeH; row++)
+            for (int col = 0; col < boxSizeW; col++)
                 if (_grid[row + boxStartRow][col + boxStartCol] == num)
                     return true;
         return false;
@@ -151,13 +155,15 @@ class SudokuSolver {
 
     bool _isValidPlace(int row, int col, int num) {
         //when item not found in col, row and current 3x3 box
-        return !_isPresentInRow(row, num) && !_isPresentInCol(col, num) && !_isPresentInBox(row - row % 3,
-                                                                                            col - col % 3, num);
+        return !_isPresentInRow(row, num) && !_isPresentInCol(col, num) && !_isPresentInBox(row - row % boxSizeW,
+                                                                                            col - col % boxSizeH, num);
     }
 
 
 public:
-    SudokuSolver(std::vector<std::vector<short>> grid) {
+    void setBoxSize(int w, int h){boxSizeW = w; boxSizeH = h;}
+    SudokuSolver(std::vector<std::vector<short>> grid, int n = 9) {
+        N = n;
         _grid = grid;
     }
 
@@ -165,13 +171,15 @@ public:
         int row, col;
         if (!_findEmptyPlace(row, col))
             return true; //when all places are filled
-        for (int num = 1; num <= 9; num++) { //valid numbers are 1 - 9
+
+        for (int num = 1; num <= N; num++) { //valid numbers are 1 - 9
             if (_isValidPlace(row, col, num)) { //check validation, if yes, put the number in the grid
                 _grid[row][col] = num;
                 if (solveSudoku()) //recursively go for other rooms in the grid
                     return true;
                 _grid[row][col] = 0; //turn to unassigned space when conditions are not satisfied
             }
+
         }
         return false;
     }
